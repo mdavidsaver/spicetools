@@ -1,0 +1,4 @@
+#!/usr/bin/env python
+
+import spice2hdf
+spice2hdf.main()

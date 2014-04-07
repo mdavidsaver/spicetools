@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+*.h5
+*~
+build
+*project
