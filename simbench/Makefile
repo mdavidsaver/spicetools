@@ -3,7 +3,8 @@ all: realall
 PYUIC=pyuic4
 PYRCC=pyrcc4
 
-UIS = simmain.ui
+UIS += simmain.ui
+UIS += varedit.ui
 
 realall: $(UIS:%.ui=ui_%.py)
 realall: $(RCS:%.qrc=%_rc.py)

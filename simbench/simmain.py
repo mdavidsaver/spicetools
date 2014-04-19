@@ -10,7 +10,7 @@ from PyQt4 import QtCore, QtGui
 
 from .ui_simmain import Ui_MainWindow
 
-import dictmodel
+from . import project
 
 _gnetlist = "gnetlist -g spice-sdb -O include_mode -O nomunge_mode -o %(net)s %(sch)s"
 
@@ -20,19 +20,6 @@ ac ( DEC | OCT | LIN ) N Fstart Fstop
 op
 """
 
-simconfig = {
-    'columns':[
-        {'name':'label'},
-        {'name':'Analysis', 'tip':simtip},
-    ],
-}
-varconfig = {
-    'columns':[
-        {'name':'label'},
-        {'name':'expression'},
-    ]
-}
-
 class SimWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
@@ -40,116 +27,64 @@ class SimWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.ui.netType.addItems(["Net list", "Schematic"])
-        self.ui.netType.setCurrentIndex(1)
+        self.psave = QtGui.QFileDialog(self,
+                                       "Save Project",
+                                       os.getcwd(),
+                                       "Project (*.sprj);;All files (*)")
+        self.psave.setDefaultSuffix(".sprj")
 
-        F =self.fselect = QtGui.QFileDialog(self)
-        F.setDirectory(os.getcwd())
-        F.setFileMode(QtGui.QFileDialog.ExistingFile)
-        F.setReadOnly(True)
-        F.setNameFilters(["Nets/Schem. (*.net *.sch)","All files (*)"])
+        self.ui.actionSave.triggered.connect(self.psave.show)
+
+
+        self.pselect = QtGui.QFileDialog(self,
+                                       "Save Project",
+                                       os.getcwd(),
+                                       "Project (*.sprj);;All files (*)")
+        self.pselect.setFileMode(QtGui.QFileDialog.ExistingFile)
+
+        self.ui.actionOpen.triggered.connect(self.pselect.show)
 
         app = QtGui.QApplication.instance()
         self.ui.actionQuit.triggered.connect(app.quit)
         
-        self.ui.actionOpen.triggered.connect(F.show)
-
-        self.ui.simBtn.clicked.connect(self.simulate)
-
-        self.ui.addAnalysis.clicked.connect(self.ui.tblAnalysis.insertBlankRow)
-        self.ui.delAnalysis.clicked.connect(self.ui.tblAnalysis.removeRows)
-
-        self.ui.addCalc.clicked.connect(self.ui.tblCalc.insertBlankRow)
-        self.ui.delCalc.clicked.connect(self.ui.tblCalc.removeRows)
-
         self.setWindowTitle('Spice Simulation Workbench')
 
-        self.sims = dictmodel.DictTable(simconfig)
-        self.vars = dictmodel.DictTable(varconfig)
+        self.root = project.Project()
+        self.model = QtGui.QStandardItemModel()
+        self.model.insertColumn(0, [self.root])
+        self.model.setHorizontalHeaderLabels(['Name'])
 
-        self.ui.tblAnalysis.setModel(self.sims)
-        self.ui.tblCalc.setModel(self.vars)
+        self.ui.projectView.setModel(self.model)
 
-        self.results = None
-        self.tempdir = None
-        self.proc = QtCore.QProcess()
+        self.ui.projectView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ui.projectView.customContextMenuRequested.connect(self.showProjectMenu)
 
-        self.proc.readyReadStandardError.connect(self.simOutput)
-        self.proc.readyReadStandardOutput.connect(self.simOutput)
-        self.proc.finished.connect(self.simDone)
+        self.menus = {}
+        self.activeItem = None
 
-    def closeEvent(self, evt):
-        if self.tempdir:
-            self.removeTemp()
-        evt.accept()
+        M = self.menus['vars'] = QtGui.QMenu(self)
+        M.addAction("Expression").setEnabled(False)
+        M.addSeparator()
+        M.addAction("&Show", self.raiseExpr)
+        M.addAction("&New", self.newExpr)
+        M.addAction("&Remove", self.delExpr)
 
-    def simOutput(self):
-        self.proc.setReadChannel(self.proc.StandardError)
-        err = self.proc.readAll()
-        if err.size():
-            print 'stderr',err
-        self.proc.setReadChannel(self.proc.StandardOutput)
-        out = self.proc.readAll()
-        if out.size():
-            print 'stderr',out
-
-    def simDone(self, code, sts):
-        print 'Simulation done', code, sts
-
-    def simulate(self):
-        self.tempdir = tempfile.mkdtemp()
-
-        fname = self.fselect.selectedFiles()
-        if len(fname)==0:
-            print 'No file'
-            return
-        fname = str(fname[1])
-        srcdir = os.path.abspath(os.path.dirname(fname))
-
-        typeidx = self.ui.netType.currentIndex()
-        assert typeidx==-1
-        if typeidx==1:
-            net = os.path.join(self.tempdir, 'generated.net')
-            # must generate netlist...
-            cmd = _gnetlist%{'sch':fname, 'net':str(net)}
-            print 'Run:',cmd
-            P = QtCore.QProcess(self)
-            P.start(cmd)
-            if not P.waitForFinished(2000):
-                print 'gnetlist took too long...'
-                P.kill()
-                return
-            elif P.exitCode()!=0:
-                print 'gnetlist error',P.exitCode()
-                return
-            net = 'generated.net'
-        else:
-            net = os.path.basename(fname)
-
-        script = os.path.join(self.tempdir, 'script.net')
-        with open(script, 'w') as S:
-            S.write("""* Generated circuit
-.control
-set sourcepath = ( "%(temp)s" "%(src)s" )
-source %(net)s
-echo "Net list loaded"
-"""%{'temp':self.tempdir, 'src':srcdir, 'net':net})
-
-
-
-    def plot(self):
-        if not self.results:
+    def showProjectMenu(self, pt):
+        idx = self.ui.projectView.indexAt(pt)
+        if not idx.isValid():
             return
 
-    def removeTemp(self):
-        if not self.tempdir:
+        item = self.model.itemFromIndex(idx)
+        M = self.menus.get(getattr(item, 'itype', None), None)
+        if not M:
             return
-        for path, dirs, files in os.walk(self.tempdir, topdown=False):
-            for F in files:
-                print 'remove file',os.path.join(path, F)
-                os.remove(os.path.join(path, F))
-            for D in dirs:
-                print 'remove empty',os.path.join(path, D)
-                os.rmdir(os.path.join(path, D))
-        print 'remove top',self.tempdir
-        os.rmdir(self.tempdir)
+
+        print 'Show menu at',pt,item
+        M.exec_(self.mapToGlobal(pt))
+
+    def editExpr(self):
+        pass
+    def newExpr(self):
+        pass
+    def delExpr(self):
+        pass
