@@ -144,10 +144,14 @@ class SimWindow(QtGui.QMainWindow):
         I = self.activeItem
 
         S = I.win.parentWidget()
-
-        I.win.setParent(None)
+        assert I.win.item is I
+        I.win.item = None
+        I.win = None
 
         self.ui.mdi.removeSubWindow(S)
-        S.deleteLater()
+        S.deleteLater() # delete S and I.win
 
         I.parent().removeRow(I.row())
+        # I is deleted
+
+        self.activeItem = None # be explicit
