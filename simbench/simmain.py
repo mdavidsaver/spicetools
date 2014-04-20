@@ -23,7 +23,7 @@ op
 class SimWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        
+
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -46,7 +46,7 @@ class SimWindow(QtGui.QMainWindow):
 
         app = QtGui.QApplication.instance()
         self.ui.actionQuit.triggered.connect(app.quit)
-        
+
         self.setWindowTitle('Spice Simulation Workbench')
 
         self.root = project.Project()
@@ -58,6 +58,12 @@ class SimWindow(QtGui.QMainWindow):
 
         self.ui.projectView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.ui.projectView.customContextMenuRequested.connect(self.showProjectMenu)
+        self.ui.projectView.doubleClicked.connect(self.projectDClick)
+
+        self.dclk = {
+            'vars':self.newExpr,
+            'calc':self.showExpr,
+        }
 
         self.menus = {}
         self.activeItem = None
@@ -65,9 +71,26 @@ class SimWindow(QtGui.QMainWindow):
         M = self.menus['vars'] = QtGui.QMenu(self)
         M.addAction("Expression").setEnabled(False)
         M.addSeparator()
-        M.addAction("&Show", self.raiseExpr)
         M.addAction("&New", self.newExpr)
-        M.addAction("&Remove", self.delExpr)
+
+        M = self.menus['calc'] = QtGui.QMenu(self)
+        M.addAction("Expression").setEnabled(False)
+        M.addSeparator()
+        M.addAction("&Edit", self.showExpr)
+        M.addAction("&New", self.newExpr)
+        M.addAction("&Delete", self.delExpr)
+
+    def projectDClick(self, idx):
+        item = self.model.itemFromIndex(idx)
+
+        M = self.dclk.get(getattr(item, 'itype', None), None)
+        if not M:
+            return
+        self.activeItem = item
+        try:
+            M()
+        finally:
+            self.activeItem = None
 
     def showProjectMenu(self, pt):
         idx = self.ui.projectView.indexAt(pt)
@@ -79,12 +102,52 @@ class SimWindow(QtGui.QMainWindow):
         if not M:
             return
 
-        print 'Show menu at',pt,item
-        M.exec_(self.mapToGlobal(pt))
+        self.activeItem = item
+        try:
+            M.exec_(self.mapToGlobal(pt))
+        finally:
+            self.activeItem = None
 
-    def editExpr(self):
-        pass
     def newExpr(self):
-        pass
+        assert self.activeItem.itype in ['vars','calc']
+
+        E = project.Calc()
+
+        if self.activeItem.itype=='vars':
+            self.activeItem.appendRow(E)
+        else:
+            P = self.activeItem.parent()
+            assert P and P.itype=='vars'
+            P.insertRow(self.activeItem.row(), E)
+
+        S = self.ui.mdi.addSubWindow(E.win)
+        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        E.win.setParent(S)
+
+        E.win.show()
+
+    def showExpr(self):
+        assert self.activeItem.itype=='calc'
+
+        S = self.activeItem.win.parentWidget()
+        if S:
+            self.activeItem.win.show()
+            self.ui.mdi.setActiveSubWindow(S)
+            return
+
+        S = self.ui.mdi.addSubWindow(self.activeItem.win)
+        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        self.activeItem.win.setParent(S)
+
     def delExpr(self):
-        pass
+        assert self.activeItem.itype=='calc'
+        I = self.activeItem
+
+        S = I.win.parentWidget()
+
+        I.win.setParent(None)
+
+        self.ui.mdi.removeSubWindow(S)
+        S.deleteLater()
+
+        I.parent().removeRow(I.row())

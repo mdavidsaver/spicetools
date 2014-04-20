@@ -69,15 +69,15 @@ class Sim(QStandardItem):
         return iterRows(self.plots)
 
 class Calc(QStandardItem):
-    itype = 'sim'
-    def __init__(self, name, expr):
-        QStandardItem.__init__(self, name)
+    itype = 'calc'
+    def __init__(self):
+        self.name, self.expr = "<unnamed>", ""
+        QStandardItem.__init__(self, self.name)
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
-        self.name, self.expr = name, expr
         self.win = VarEdit(self)
 
 class Plot(object):
-    itype = 'sim'
+    itype = 'plot'
     def __init__(self, name):
         QStandardItem.__init__(self, name)
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
