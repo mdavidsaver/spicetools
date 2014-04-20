@@ -10,6 +10,8 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QStandardItem, QBrush
 
 from .varedit import VarEdit
+from .projectedit import ProjEdit
+from .simedit import SimEdit
 
 def iterRows(item):
     for n in range(item.rowCount()):
@@ -27,21 +29,16 @@ class SimNode(QStandardItem):
         QStandardItem.__init__(self, "Analyses")
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
 
-class PlotNode(QStandardItem):
-    itype = 'plots'
-    def __init__(self):
-        QStandardItem.__init__(self, "Plots")
-        self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
-
 class Project(QStandardItem):
     itype = 'project'
     def __init__(self):
         QStandardItem.__init__(self, "Project")
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
-        self.pfile, self.nfile = None, None
+        self.fname, self.genNet = None, False
 
         self.vars = VarNode()
         self.sims = SimNode()
+        self.win = ProjEdit(self)
 
         self.insertRows(0, [self.vars, self.sims])
 
@@ -52,16 +49,15 @@ class Project(QStandardItem):
 
 class Sim(QStandardItem):
     itype = 'sim'
-    def __init__(self, name, line):
-        QStandardItem.__init__(self)
+    def __init__(self):
+        self.name, self.line = "<unnamed>", ""
+        QStandardItem.__init__(self, self.name)
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
-        self.name, self.line = name, line
-        self.setText(name)
 
         self.vars = VarNode()
-        self.plots = PlotNode()
+        self.win = SimEdit(self)
 
-        self.insertRows(0, [self.vars, self.plots])
+        self.insertRows(0, [self.vars])
 
     def itervars(self):
         return iterRows(self.vars)
@@ -75,10 +71,3 @@ class Calc(QStandardItem):
         QStandardItem.__init__(self, self.name)
         self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
         self.win = VarEdit(self)
-
-class Plot(object):
-    itype = 'plot'
-    def __init__(self, name):
-        QStandardItem.__init__(self, name)
-        self.setFlags(Qt.ItemIsEnabled|Qt.ItemIsSelectable)
-        self.name = name

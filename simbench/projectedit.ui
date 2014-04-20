@@ -46,7 +46,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="fileBtn">
           <property name="text">
            <string>&lt;-</string>
           </property>

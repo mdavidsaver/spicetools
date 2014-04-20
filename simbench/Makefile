@@ -5,6 +5,8 @@ PYRCC=pyrcc4
 
 UIS += simmain.ui
 UIS += varedit.ui
+UIS += projectedit.ui
+UIS += simedit.ui
 
 realall: $(UIS:%.ui=ui_%.py)
 realall: $(RCS:%.qrc=%_rc.py)

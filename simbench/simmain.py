@@ -14,12 +14,6 @@ from . import project
 
 _gnetlist = "gnetlist -g spice-sdb -O include_mode -O nomunge_mode -o %(net)s %(sch)s"
 
-simtip = """tran Tstep Tstop [ Tstart [ Tmax ] ] [ UIC ]
-dc Source-Name Vstart Vstop Vincr [ Source2 Vstart2 Vstop2 Vincr2 ]
-ac ( DEC | OCT | LIN ) N Fstart Fstop
-op
-"""
-
 class SimWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
@@ -60,13 +54,21 @@ class SimWindow(QtGui.QMainWindow):
         self.ui.projectView.customContextMenuRequested.connect(self.showProjectMenu)
         self.ui.projectView.doubleClicked.connect(self.projectDClick)
 
+        S = self.ui.mdi.addSubWindow(self.root.win)
+        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        self.root.win.setParent(S)
+        S.hide()
+
         self.dclk = {
-            'vars':self.newExpr,
+            'project':self.showProject,
             'calc':self.showExpr,
         }
 
         self.menus = {}
         self.activeItem = None
+
+        M = self.menus['project'] = QtGui.QMenu(self)
+        M.addAction("&Show", self.showProject)
 
         M = self.menus['vars'] = QtGui.QMenu(self)
         M.addAction("Expression").setEnabled(False)
@@ -76,9 +78,21 @@ class SimWindow(QtGui.QMainWindow):
         M = self.menus['calc'] = QtGui.QMenu(self)
         M.addAction("Expression").setEnabled(False)
         M.addSeparator()
-        M.addAction("&Edit", self.showExpr)
+        M.addAction("&Show", self.showExpr)
         M.addAction("&New", self.newExpr)
         M.addAction("&Delete", self.delExpr)
+
+        M = self.menus['sims'] = QtGui.QMenu(self)
+        M.addAction("Analysis").setEnabled(False)
+        M.addSeparator()
+        M.addAction("&New", self.newSim)
+
+        M = self.menus['sim'] = QtGui.QMenu(self)
+        M.addAction("Analysis").setEnabled(False)
+        M.addSeparator()
+        M.addAction("&Show", self.showSim)
+        M.addAction("&New", self.newSim)
+        M.addAction("&Delete", self.delSim)
 
     def projectDClick(self, idx):
         item = self.model.itemFromIndex(idx)
@@ -108,26 +122,43 @@ class SimWindow(QtGui.QMainWindow):
         finally:
             self.activeItem = None
 
-    def newExpr(self):
-        assert self.activeItem.itype in ['vars','calc']
+    def showProject(self):
+        self.root.win.show()
 
-        E = project.Calc()
+    def _addSubWin(self, win):
+        S = self.ui.mdi.addSubWindow(win)
+        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        win.setParent(S)
+        win.show()
 
-        if self.activeItem.itype=='vars':
+    _iopts = [
+        # name, factory, iparent, inode)
+        ('Calc', project.Calc, 'vars', 'calc'),
+        ('Sim', project.Sim, 'sims', 'sim'),
+    ]
+    def new_X(self, F,P,I):
+        assert self.activeItem.itype in [P,I]
+
+        E = F()
+
+        if self.activeItem.itype==P:
             self.activeItem.appendRow(E)
         else:
-            P = self.activeItem.parent()
-            assert P and P.itype=='vars'
-            P.insertRow(self.activeItem.row(), E)
+            parent = self.activeItem.parent()
+            assert parent and parent.itype==P
+            parent.insertRow(self.activeItem.row(), E)
 
-        S = self.ui.mdi.addSubWindow(E.win)
-        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
-        E.win.setParent(S)
+        self._addSubWin(E.win)
+        
 
-        E.win.show()
+    def newExpr(self):
+        return self.new_X(project.Calc, 'vars', 'calc')
 
-    def showExpr(self):
-        assert self.activeItem.itype=='calc'
+    def newSim(self):
+        return self.new_X(project.Sim, 'sims', 'sim')
+
+    def show_X(self, I):
+        assert self.activeItem.itype==I
 
         S = self.activeItem.win.parentWidget()
         if S:
@@ -135,12 +166,16 @@ class SimWindow(QtGui.QMainWindow):
             self.ui.mdi.setActiveSubWindow(S)
             return
 
-        S = self.ui.mdi.addSubWindow(self.activeItem.win)
-        S.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
-        self.activeItem.win.setParent(S)
+        self._addSubWin(self.activeItem.win)
 
-    def delExpr(self):
-        assert self.activeItem.itype=='calc'
+    def showExpr(self):
+        return self.show_X('calc')
+
+    def showSim(self):
+        return self.show_X('sim')
+
+    def del_X(self, I):
+        assert self.activeItem.itype==I
         I = self.activeItem
 
         S = I.win.parentWidget()
@@ -155,3 +190,9 @@ class SimWindow(QtGui.QMainWindow):
         # I is deleted
 
         self.activeItem = None # be explicit
+
+    def delExpr(self):
+        return self.del_X('calc')
+
+    def delSim(self):
+        return self.del_X('sim')
