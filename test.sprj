@@ -1,0 +1,39 @@
+{
+  "sims": [
+    {
+      "line": "op",
+      "name": "op",
+      "vars": []
+    },
+    {
+      "line": "dc Vin 0 5 0.5",
+      "name": "dc1",
+      "vars": [
+        {
+          "expr": "2*X",
+          "name": "Q"
+        }
+      ]
+    },
+    {
+      "line": "ac Vin dec 10 10k 1mega",
+      "name": "ac",
+      "vars": []
+    }
+  ],
+  "net": {
+    "schem": false,
+    "filename": "invalid.net"
+  },
+  "version": 1,
+  "vars": [
+    {
+      "expr": "Y+Z",
+      "name": "X"
+    },
+    {
+      "expr": "B",
+      "name": "A"
+    }
+  ]
+}

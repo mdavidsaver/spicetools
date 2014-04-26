@@ -1,0 +1,9 @@
+{
+  "sims": [],
+  "net": {
+    "schem": true,
+    "filename": "opsim.sch"
+  },
+  "version": 1,
+  "vars": []
+}
