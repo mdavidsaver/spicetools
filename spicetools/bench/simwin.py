@@ -18,6 +18,7 @@ from .simwin_ui import Ui_SimWin
 from .expr import Expr
 from .analysis import Analysis
 from .spiceexec import SpiceRunner
+from ..log.logwin import LogWin
 
 from ..view.mainwin import ViewerWindow
 
@@ -51,6 +52,8 @@ class SimWin(QtGui.QMainWindow):
         self.requestStart.connect(self.sim.startSim)
         self.sim.done.connect(self.simDone)
         self.sim.stateChanged.connect(self.ui.status.setText)
+
+        self.ui.actionLogWindow.triggered.connect(LogWin.showLog)
 
         self.ui.actionAboutQt.triggered.connect(QtGui.QApplication.instance().aboutQt)
         self.ui.actionAbout.triggered.connect(self.about)

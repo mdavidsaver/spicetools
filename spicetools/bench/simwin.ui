@@ -151,8 +151,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQt"/>
    </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="actionLogWindow"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Simulation"/>
+   <addaction name="menu_Window"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -226,6 +233,11 @@
   <action name="actionAboutQt">
    <property name="text">
     <string>aboutQt</string>
+   </property>
+  </action>
+  <action name="actionLogWindow">
+   <property name="text">
+    <string>&amp;Log Window</string>
    </property>
   </action>
  </widget>

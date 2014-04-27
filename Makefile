@@ -10,6 +10,7 @@ UIS += spicetools/bench/fileframe.ui
 UIS += spicetools/bench/expr.ui
 UIS += spicetools/bench/analysis.ui
 UIS += spicetools/view/mainwin.ui
+UIS += spicetools/log/logwin.ui
 
 RCS += spicetools/bench/bench.qrc
 RCS += spicetools/view/viewer.qrc

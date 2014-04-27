@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'spicetools/bench/simwin.ui'
 #
-# Created: Sun Apr 27 13:40:38 2014
+# Created: Sun Apr 27 15:05:09 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -77,6 +77,8 @@ class Ui_SimWin(object):
         self.menu_Simulation.setObjectName(_fromUtf8("menu_Simulation"))
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
+        self.menu_Window = QtGui.QMenu(self.menubar)
+        self.menu_Window.setObjectName(_fromUtf8("menu_Window"))
         SimWin.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(SimWin)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -102,6 +104,8 @@ class Ui_SimWin(object):
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
         self.actionAboutQt = QtGui.QAction(SimWin)
         self.actionAboutQt.setObjectName(_fromUtf8("actionAboutQt"))
+        self.actionLogWindow = QtGui.QAction(SimWin)
+        self.actionLogWindow.setObjectName(_fromUtf8("actionLogWindow"))
         self.menu_File.addAction(self.actionNew)
         self.menu_File.addAction(self.actionOpen)
         self.menu_File.addAction(self.actionSave)
@@ -114,8 +118,10 @@ class Ui_SimWin(object):
         self.menu_Simulation.addAction(self.actionPlot)
         self.menuHelp.addAction(self.actionAbout)
         self.menuHelp.addAction(self.actionAboutQt)
+        self.menu_Window.addAction(self.actionLogWindow)
         self.menubar.addAction(self.menu_File.menuAction())
         self.menubar.addAction(self.menu_Simulation.menuAction())
+        self.menubar.addAction(self.menu_Window.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(SimWin)
@@ -136,6 +142,7 @@ class Ui_SimWin(object):
         self.menu_File.setTitle(QtGui.QApplication.translate("SimWin", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_Simulation.setTitle(QtGui.QApplication.translate("SimWin", "&Simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("SimWin", "Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_Window.setTitle(QtGui.QApplication.translate("SimWin", "&Window", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setText(QtGui.QApplication.translate("SimWin", "&New", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setShortcut(QtGui.QApplication.translate("SimWin", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setText(QtGui.QApplication.translate("SimWin", "&Open", None, QtGui.QApplication.UnicodeUTF8))
@@ -152,6 +159,7 @@ class Ui_SimWin(object):
         self.actionPlot.setShortcut(QtGui.QApplication.translate("SimWin", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAbout.setText(QtGui.QApplication.translate("SimWin", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAboutQt.setText(QtGui.QApplication.translate("SimWin", "aboutQt", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionLogWindow.setText(QtGui.QApplication.translate("SimWin", "&Log Window", None, QtGui.QApplication.UnicodeUTF8))
 
 from .fileframe import FileFrame
 from . import bench_rc

@@ -94,11 +94,11 @@ class SpiceRunner(QtCore.QObject):
             _log.exception("startSim failed")
 
     def _started(self):
-        _log.debug("Process started")
+        _log.info("Process started")
         self._setState(RUN)
 
     def _finished(self, code, status):
-        _log.debug("Process finished: %s %s",code,status)
+        _log.info("Process finished: %s %s",code,status)
         if code or status:
             self._setState(ERR)
         else:
@@ -112,5 +112,5 @@ class SpiceRunner(QtCore.QObject):
 
     def _read(self):
         msg = self.runner.readAll()
-        _log.debug("Process Read: %s", msg)
+        _log.info("Process Read: %s", msg)
         self.msg.emit(QtCore.QString(msg))
