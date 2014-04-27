@@ -1,5 +1,16 @@
 {
-  "sims": [],
+  "sims": [
+    {
+      "line": "op",
+      "name": "op",
+      "vars": []
+    },
+    {
+      "line": "ac dec 10 10k 1mega",
+      "name": "ac1",
+      "vars": []
+    }
+  ],
   "net": {
     "schem": true,
     "filename": "opsim.sch"

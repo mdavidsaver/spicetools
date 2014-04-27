@@ -24,15 +24,15 @@ def h5group(**kws):
             return H
     return typer
 
-def getargs():
-    import argparse
+def getargs(args):
+    import argparse, sys
 
     P = argparse.ArgumentParser(description='Convert ngspice output files to a hdf5 format')
     P.add_argument('infile', type=argparse.FileType('r'))
     P.add_argument('outfile', type=h5group())
     P.add_argument('--verbose', '-v', action='store_const', default=logging.INFO, const=logging.DEBUG)
 
-    return P.parse_args()
+    return P.parse_args(args=args or sys.argv)
 
 def readHeader(inp):
     """Read the ascii header common to both binary and ascii formats
@@ -197,10 +197,7 @@ def loadspice(inp):
         raise ValueError('Missing format tag')
     return OS, head
 
-def main():
-    args = getargs()
-    logging.basicConfig(format='%(levelname)s:%(message)s',
-                        level=args.verbose)
+def main(args):
     head = readHeader(args.infile)
     OS = createOutputSet(args.outfile, head, args)
     if 'binary' in head:
@@ -211,4 +208,7 @@ def main():
         raise ValueError('Missing format tag')
 
 if __name__=='__main__':
-    main()
+    args = getargs()
+    logging.basicConfig(format='%(levelname)s:%(message)s',
+                        level=args.verbose)
+    main(args)
