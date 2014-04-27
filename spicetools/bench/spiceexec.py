@@ -79,7 +79,8 @@ class SpiceRunner(QtCore.QObject):
             pfileroot = os.path.splitext(D['projectfile'])[0]
 
             self.h5file = '%s.h5'%pfileroot
-            args = ['-m','spicerun','-v', self.tempprj, self.h5file]
+            args = ['-m','spicetools.sim','-v','--time',
+                    self.tempprj, self.h5file]
 
             _log.debug("In %s", D['projectdir'])
             _log.debug("Running: %s %s", sys.executable, args)

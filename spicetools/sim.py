@@ -12,9 +12,9 @@ import os, os.path, shutil
 
 import subprocess
 
-from simbench.util import rmrf
+from .util import rmrf
 
-import spice2hdf
+from . import raw2hdf
 
 _dft_conf = {
     'gnetlist':'gnetlist',
@@ -25,20 +25,19 @@ _dft_conf = {
 
 
 def getargs(args=None):
-    from spice2hdf import h5group
-    import argparse, sys
+    from .run import h5group, addCommonArgs
+    import argparse
     
     P = argparse.ArgumentParser(description='Execute a simbench .sprj simulation')
     P.add_argument('infile', type=argparse.FileType('r'), metavar='input.sprj',
                    help="A .sproj file")
     P.add_argument('outfile', type=h5group(), metavar='out.h5[:/a/b]',
                    help="An HDF5 with optional H5 Group (/ if omitted)")
-    P.add_argument('--verbose', '-v', action='store_const', default=logging.INFO, const=logging.DEBUG)
-    P.add_argument('--quiet', '-q', action='store_const', dest='verbose', const=logging.WARN)
     P.add_argument('--config','-C', metavar='FILE', type=argparse.FileType('r'),
                    help='Use config file instead of default')
+    addCommonArgs(P)
 
-    return P.parse_args(args=args or sys.argv[1:])
+    return P
 
 def loadProject(FP):
     import json
@@ -186,15 +185,16 @@ def main(args):
         _log.info("Aggregating output files")
 
         for raw,grp in rawfiles:
-            A2 = spice2hdf.getargs([os.path.join(outdir,raw), '<<<skip>>>'])
+            A2 = raw2hdf.getargs()
+            A2 = A2.parse_args([os.path.join(outdir,raw), '<<<skip>>>'])
             A2.outfile = args.outfile.require_group(grp)
             _log.info("Process %s", A2)
-            spice2hdf.main(A2)
+            raw2hdf.main(A2)
 
     _log.info("Done")
 
 if __name__=='__main__':
-    args = getargs()
-    logging.basicConfig(format='%(asctime)s %(message)s',
-                        level=args.verbose)
+    args = getargs().parse_args()
+    logging.basicConfig(format=args.format,
+                        level=args.level)
     main(args)

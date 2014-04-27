@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
-import logging
-import spicerun
+from spicetools.run import runCLI
+from spicetools import sim
 
-if __name__=='__main__':
-    args = spicerun.getargs()
-    logging.basicConfig(format='%(asctime)s %(message)s',
-                        level=args.verbose)
-    spicerun.main(args)
-
+runCLI(sim)

@@ -95,7 +95,7 @@ class SimWin(QtGui.QMainWindow):
         if self.h5file is None:
             return
         W = ViewerWindow()
-        W.openFile(self.h5file)
+        W.open(self.h5file)
         W.show()
 
     def addExpr(self):
