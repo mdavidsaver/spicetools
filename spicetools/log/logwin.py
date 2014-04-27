@@ -17,12 +17,16 @@ from .logwin_ui import Ui_LogWin
 
 class LogWin(QtGui.QMainWindow):
     instance = None
-    
+
+    @classmethod
+    def createLog(cls):
+        if cls.instance is None:
+            cls.instance = cls()
+
     @classmethod
     @QtCore.pyqtSlot()
     def showLog(cls):
-        if cls.instance is None:
-            cls.instance = cls()
+        cls.createLog()
         cls.instance.show()
 
     def __init__(self):

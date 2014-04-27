@@ -54,6 +54,7 @@ class SimWin(QtGui.QMainWindow):
         self.sim.stateChanged.connect(self.ui.status.setText)
 
         self.ui.actionLogWindow.triggered.connect(LogWin.showLog)
+        LogWin.createLog()
 
         self.ui.actionAboutQt.triggered.connect(QtGui.QApplication.instance().aboutQt)
         self.ui.actionAbout.triggered.connect(self.about)
