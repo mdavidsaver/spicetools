@@ -10,7 +10,7 @@ _log = logging.getLogger(__name__)
 
 import os, os.path, shutil
 
-import subprocess
+import subprocess, re
 
 from .util import rmrf
 from .conf import loadConfig
@@ -44,6 +44,28 @@ def loadProject(FP):
         _log.debug("D: %s", D)
     return D
 
+# Match path in spice include directives
+_include = re.compile(r'(\s*\.include\s+)(\S+)(\s*)', re.IGNORECASE)
+
+def expandInclude(D, FD):
+    """ngspice will only look for include directives relative
+    to the directory where it is run, or of the 'source' statement.
+    Neither is correct for us.  So we use the directory
+    where the original schem file is (and where gnetlist ran)
+    """
+    netdir = os.path.dirname(D['net']['filename'])
+
+    def rep(M):
+        return '%s%s%s'%(M.group(1),
+            os.path.join(netdir, M.group(2)),
+            M.group(3)
+            )
+
+    R =  _include.sub(rep, FD.read())
+    FD.seek(0)
+    FD.truncate()
+    FD.write(R)
+
 def genNet(D, conf, outfile):
     netdir = os.path.dirname(D['net']['filename'])
 
@@ -56,6 +78,9 @@ def genNet(D, conf, outfile):
     _log.debug("Running: '%s'", cmd)
 
     subprocess.check_call(cmd, shell=True, cwd=netdir)
+
+    with open(outfile, 'r+') as FP:
+        expandInclude(D, FP)
 
 def runSpice(D, conf, deck, outdir):
     A = {
