@@ -10,7 +10,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
 
-from ..fileframe import FileFrame
+from ..bench.fileframe import FileFrame
 
 from .tutil import SigRecorder, AppTestCase
 
