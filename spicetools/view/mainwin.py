@@ -57,11 +57,17 @@ class ViewerWindow(gui.QMainWindow):
         self.instances.add(self)
         evt.accept()
 
+    def _dropRef(self):
+        self.instances.remove(self)
+
     def closeEvent(self, evt):
         self.settings.setValue("viewerwindow/geometry", self.saveGeometry())
         self.settings.sync()
+
+        self.destroyed.connect(self._dropRef)
+        self.deleteLater()
+
         evt.accept()
-        self.instances.remove(self)
 
     @core.pyqtSlot(str)
     def open(self, fname):
