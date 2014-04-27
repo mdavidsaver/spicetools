@@ -35,6 +35,9 @@ class SimWin(QtGui.QMainWindow):
         self.ui = Ui_SimWin()
         self.ui.setupUi(self)
 
+        self.settings = QtCore.QSettings("spicetools", "benchui")
+        self.restoreGeometry(self.settings.value("mainwindow/geometry").toByteArray())
+
         QtGui.QVBoxLayout(self.ui.topArea)
 
         self.sim = SpiceRunner(self)
@@ -57,6 +60,8 @@ class SimWin(QtGui.QMainWindow):
 
         self.ui.actionLogWindow.triggered.connect(LogWin.showLog)
         LogWin.createLog()
+        if self.settings.value("mainwindow/showlog", False).toBool():
+            LogWin.showLog()
 
         self.ui.actionAboutQt.triggered.connect(QtGui.QApplication.instance().aboutQt)
         self.ui.actionAbout.triggered.connect(self.about)
@@ -80,6 +85,9 @@ class SimWin(QtGui.QMainWindow):
 
     def closeEvent(self, evt):
         self.ui.actionAbort.trigger()
+        self.settings.setValue("mainwindow/geometry", self.saveGeometry())
+        self.settings.setValue("mainwindow/showlog", LogWin.visibleLog())
+        self.settings.sync()
         evt.accept()
 
     @QtCore.pyqtSlot()

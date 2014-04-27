@@ -29,12 +29,19 @@ class LogWin(QtGui.QMainWindow):
         cls.createLog()
         cls.instance.show()
 
+    @classmethod
+    def visibleLog(cls):
+        return cls.instance is not None and cls.instance.isVisible()
+
     def __init__(self):
         super(LogWin,self).__init__()
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
 
         self.ui = Ui_LogWin()
         self.ui.setupUi(self)
+
+        self.settings = QtCore.QSettings("spicetools", "benchui")
+        self.restoreGeometry(self.settings.value("logwindow/geometry").toByteArray())
 
         self.save = QtGui.QFileDialog(self,
                          'Save current log contents',
@@ -60,6 +67,8 @@ class LogWin(QtGui.QMainWindow):
         root = logging.getLogger()
         root.removeHandler(self._H)
         self.instance = None
+        self.settings.setValue("logwindow/geometry", self.saveGeometry())
+        self.settings.sync()
         evt.accept()
 
     @QtCore.pyqtSlot()

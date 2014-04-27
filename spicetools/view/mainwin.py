@@ -22,6 +22,9 @@ class ViewerWindow(gui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        self.settings = core.QSettings("spicetools", "benchui")
+        self.restoreGeometry(self.settings.value("viewerwindow/geometry").toByteArray())
+
         F =self.fselect = gui.QFileDialog(self)
         F.setDirectory(os.getcwd())
         F.setFileMode(gui.QFileDialog.ExistingFile)
@@ -55,6 +58,8 @@ class ViewerWindow(gui.QMainWindow):
         evt.accept()
 
     def closeEvent(self, evt):
+        self.settings.setValue("viewerwindow/geometry", self.saveGeometry())
+        self.settings.sync()
         evt.accept()
         self.instances.remove(self)
 
