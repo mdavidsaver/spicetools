@@ -4,6 +4,9 @@ Copyright (C) 2014 Michael Davidsaver
 License is GPL3+, see file LICENSE for details
 """
 
+import logging
+_log = logging.getLogger(__name__)
+
 import numpy
 import h5py
 
@@ -59,11 +62,14 @@ def loadspice(fname):
         return readspice(fname)
 
 def readhdf5(fname):
+    _log.debug("Reading: %s", fname)
     F = h5py.File(fname,'r')
     grps=[]
     def collect(name, obj, grps=grps):
+        _log.debug("Visitx: %s", obj)
         if not isinstance(obj, h5py.Group):
             return
+        _log.debug("Visit group %s (%s)", obj, obj.attrs)
         if obj.attrs.get('formatid')=='spice2hdf-1.0':
             grps.append(obj)
     F.visititems(collect)

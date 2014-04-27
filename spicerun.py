@@ -114,7 +114,7 @@ def writeDeck(D, FP, netfile, outdir):
             FP.write('let %s = %s'%(K,V))
 
         FP.write('write %s.raw\n'%S['name'])
-        outfiles.append('%s.raw'%S['name'])
+        outfiles.append(('%s.raw'%S['name'], S['name']))
 
     FP.write(_script_end)
     return outfiles
@@ -185,9 +185,9 @@ def main(args):
 
         _log.info("Aggregating output files")
 
-        for raw in rawfiles:
+        for raw,grp in rawfiles:
             A2 = spice2hdf.getargs([os.path.join(outdir,raw), '<<<skip>>>'])
-            A2.outfile = args.outfile
+            A2.outfile = args.outfile.require_group(grp)
             _log.info("Process %s", A2)
             spice2hdf.main(A2)
 
