@@ -81,7 +81,12 @@ def runCLI(mod):
     opts = mod.getargs().parse_args()
     import logging
     logging.basicConfig(level=opts.level, format=opts.format)
-    mod.main(opts)
+
+    from .util import TempDir
+    try:
+        mod.main(opts)
+    finally:
+        TempDir.cleanup()
 
 def runGUI(mod):
     """Run a Qt graphical application
@@ -112,7 +117,11 @@ def runGUI(mod):
     else:
         wins.append(mod.window())
     [W.show() for W in wins]
-    sys.exit(app.exec_())
+    from .util import TempDir
+    try:
+        sys.exit(app.exec_())
+    finally:
+        TempDir.cleanup()
 
 if __name__=='__main__':
     import doctest

@@ -7,7 +7,7 @@ License is GPL3+, see file LICENSE for details
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-from .util import svarname
+from ..util import svarname
 
 from .ui_expr import Ui_Expr
 

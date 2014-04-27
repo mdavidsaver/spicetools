@@ -18,7 +18,8 @@ from .ui_simwin import Ui_SimWin
 from .expr import Expr
 from .analysis import Analysis
 from .spiceexec import SpiceRunner
-from spiceview.mainwin import ViewerWindow
+
+from ..view.mainwin import ViewerWindow
 
 # match (to remove) EOL whitespace
 _trailing_space = re.compile(r'([ \t]+)$', re.MULTILINE)
