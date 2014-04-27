@@ -17,21 +17,13 @@ from PyQt4.QtCore import Qt
 from .ui_simwin import Ui_SimWin
 from .expr import Expr
 from .analysis import Analysis
-from .runspice import SpiceRunner
+from .spiceexec import SpiceRunner
 
 # match (to remove) EOL whitespace
 _trailing_space = re.compile(r'([ \t]+)$', re.MULTILINE)
 
-# configuration (currently static)
-_conf = {
-    'gnetlist':'gnetlist',
-    'gnetlist.cmd':"%(gnetlist)s -g spice-sdb -O include_mode -O nomunge_mode -o %(net)s %(sch)s",
-    'spice':'ngspice',
-    'spice.cmd':'%(spice)s --no-spiceinit --pipe %(deck)s',
-}
-
 class SimWin(QtGui.QMainWindow):
-    requestStart = QtCore.pyqtSignal(object, object)
+    requestStart = QtCore.pyqtSignal(object)
 
     def __init__(self):
         super(SimWin, self).__init__()
@@ -82,11 +74,12 @@ class SimWin(QtGui.QMainWindow):
     def startSim(self):
         D = self.todict()
         # Expand paths fully
-        D['projectdir'] = os.path.dirname(os.path.abspath(self.fname or 'unsaved.proj'))
+        D['projectfile'] = os.path.abspath(self.fname or 'unsaved.proj')
+        D['projectdir'] = os.path.dirname(D['projectfile'])
         if not os.path.isabs(D['net']['filename']):
             D['net']['filename'] = os.path.join(D['projectdir'],D['net']['filename'])
         _log.debug('Start sim with %s',D)
-        self.requestStart.emit(D, _conf)
+        self.requestStart.emit(D)
 
     @QtCore.pyqtSlot(object)
     def simDone(self, results):
