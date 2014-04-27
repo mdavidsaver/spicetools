@@ -11,7 +11,7 @@ import numpy
 from PyQt4 import (QtGui as gui, QtCore as core)
 
 from .ui_mainwin import Ui_MainWindow
-from .spiceio import loadspice
+from ..io import loadspice
 
 class ViewerWindow(gui.QMainWindow):
     def __init__(self):
@@ -37,7 +37,7 @@ class ViewerWindow(gui.QMainWindow):
         self.ui.actionClose.triggered.connect(self.closeFile)
         self.ui.actionCloneWindow.triggered.connect(self.newWin)
 
-        F.fileSelected.connect(self.openFile)
+        F.fileSelected.connect(self.open)
 
         self.ui.actionAboutQt.triggered.connect(app.aboutQt)
         self.ui.actionAbout.triggered.connect(self.about)
@@ -59,7 +59,7 @@ class ViewerWindow(gui.QMainWindow):
         self.instances.remove(self)
 
     @core.pyqtSlot(str)
-    def openFile(self, fname):
+    def open(self, fname):
         print 'Open file',fname
 
         fname = str(fname)
@@ -104,7 +104,7 @@ class ViewerWindow(gui.QMainWindow):
     @core.pyqtSlot()
     def reloadFile(self):
         if self.fset and self.fset.name:
-            self.openFile(self.fset.name)
+            self.open(self.fset.name)
 
     @core.pyqtSlot()
     def closeFile(self):

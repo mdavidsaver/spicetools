@@ -81,7 +81,7 @@ def loadspice(fname):
     return readhdf5(fname)
 
 def _autoclose(F):
-    F.close()
+    F().close()
 
 def readhdf5(fname):
     """Process an HDF5 file and return a vectorset File

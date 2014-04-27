@@ -87,16 +87,32 @@ def runGUI(mod):
     """Run a Qt graphical application
 
     'mod' must provide a method 'getargs' which returns
-    an ArgumentParser, and a method 'main' which accepts
-    an parsed arguments object.
+    an ArgumentParser, and a method 'window' which accepts
+    an parsed arguments object and returns a list of QWidgets.
     """
     P = mod.getargs()
     import sys, logging
     from PyQt4 import QtGui
     app = QtGui.QApplication(sys.argv)
     opts = P.parse_args(map(str, app.arguments()[1:]))
+
     logging.basicConfig(level=opts.level, format=opts.format)
-    mod.main(opts)
+
+    wins = []
+    if opts.infile:
+        if isinstance(opts.infile, list):
+            for F in opts.infile:
+                W = mod.window()
+                W.open(F)
+                wins.append(W)
+        else:
+            W = mod.window()
+            W.open(opts.infile)
+            wins.append(W)
+    else:
+        wins.append(mod.window())
+    [W.show() for W in wins]
+    sys.exit(app.exec_())
 
 if __name__=='__main__':
     import doctest
