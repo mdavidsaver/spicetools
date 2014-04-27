@@ -69,7 +69,9 @@ def loadspice(fname):
         # an HDF5 file with group specifier
         fname, _, grp = fname.partition(':')
         F = h5py.File(fname)
-        return readhdf5(F.require_group(grp))
+        R = readhdf5(F.require_group(grp))
+        F.close()
+        return R
 
     # magic detection of HDF5
     with open(fname,'rb') as F:
@@ -79,9 +81,6 @@ def loadspice(fname):
             return readspice(F)
 
     return readhdf5(fname)
-
-def _autoclose(F):
-    F().close()
 
 def readhdf5(fname):
     """Process an HDF5 file and return a vectorset File
@@ -112,12 +111,14 @@ def readhdf5(fname):
 
     vectors = {}
     for grp in grps:
-        V = VectorSet(grp['data'], grp.attrs['columns'],
+        V = VectorSet(grp['data'][:], grp.attrs['columns'][:],
                       dict(grp.attrs))
         vectors[grp.name] = V
 
     R = File(F.file.filename, vectors)
-    R._autoclose = weakref.ref(F.file, _autoclose)
+    if not isinstance(fname, h5py.Group):
+        F.file.close()
+
     return R
 
 def readspice(fname):
