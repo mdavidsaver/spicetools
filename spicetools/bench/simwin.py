@@ -68,7 +68,7 @@ class SimWin(QtGui.QMainWindow):
         self.clear()
 
     def _updateFile(self, fname):
-        self.fname = str(fname)
+        self.fname = fname and str(fname)
         if fname:
             self.dia.selectFile(fname)
             self.setWindowTitle("Spice Bench - %s"%fname)
@@ -155,7 +155,7 @@ class SimWin(QtGui.QMainWindow):
             fname = self.fname
         if fname is None:
             if not _recurse:
-                fname = self._showSaveAs(_recurse==True)
+                fname = self._showSaveAs(_recurse=True)
         if fname is None:
             return
 
