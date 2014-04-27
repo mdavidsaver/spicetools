@@ -4,7 +4,8 @@ import logging
 import spicerun
 
 if __name__=='__main__':
+    args = spicerun.getargs()
     logging.basicConfig(format='%(asctime)s %(message)s',
-                        level=logging.DEBUG)
-    spicerun.main(*spicerun.getargs())
+                        level=args.verbose)
+    spicerun.main(args)
 

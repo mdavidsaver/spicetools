@@ -24,47 +24,47 @@ _dft_conf = {
 }
 
 
-def getargs():
-    from optparse import OptionParser
+def getargs(args=None):
+    from spice2hdf import h5group
+    import argparse, sys
     
-    P = OptionParser(usage='%prog [options] <inputfile.sprj> <output.h5>')
-    
-    P.add_option('-v','--verbose', action='count', default=0,
-                 help="Make more noise")
-    P.add_option('-C','--config', metavar='FILE',
-                 help='Use config file instead of default')
+    P = argparse.ArgumentParser(description='Execute a simbench .sprj simulation')
+    P.add_argument('infile', type=argparse.FileType('r'), metavar='input.sprj',
+                   help="A .sproj file")
+    P.add_argument('outfile', type=h5group(), metavar='out.h5[:/a/b]',
+                   help="An HDF5 with optional H5 Group (/ if omitted)")
+    P.add_argument('--verbose', '-v', action='store_const', default=logging.INFO, const=logging.DEBUG)
+    P.add_argument('--quiet', '-q', action='store_const', dest='verbose', const=logging.WARN)
+    P.add_argument('--config','-C', metavar='FILE', type=argparse.FileType('r'),
+                   help='Use config file instead of default')
 
-    opts, args = P.parse_args()
-    if len(args)!=2:
-        P.error("Must specify both input and output files")
-    return opts, args[0], args[1]
+    return P.parse_args(args=args or sys.argv[1:])
 
-def loadProject(fname):
+def loadProject(FP):
     import json
-    with open(fname, 'r') as FP:
-        D = json.load(FP)
+    D = json.load(FP)
     if not isinstance(D, dict) or 'net' not in D or D.get('version',0)!=1:
-        raise ValueError("Invalid file contents: %s"%fname)
+        raise ValueError("Invalid file contents: %s"%FP.name)
     # expand paths to absolute
-    D['projectdir'] = os.path.abspath(os.path.dirname(fname))
+    D['projectdir'] = os.path.abspath(os.path.dirname(FP.name))
     D['net']['filename'] = os.path.join(D['projectdir'], D['net']['filename'])
     if _log.isEnabledFor(logging.DEBUG):
         _log.debug("D: %s", D)
     return D
 
-def loadConfig(fname=None):
+def loadConfig(FP=None):
     from ConfigParser import SafeConfigParser as ConfigParser
     P = ConfigParser(defaults=_dft_conf)
+    P.add_section('spicerun')
     P.read([
         '/etc/spicerun.conf',
         os.path.expanduser('~/.config/spicetools/spicerun.conf'),
         'spicerun.conf'
     ])
-    if fname:
-        with open(fname, 'r') as FP:
-            P.readfp(FP)
+    if FP:
+        P.readfp(FP)
 
-    return dict([(K,P.get('DEFAULT',K)) for K in _dft_conf.iterkeys()])
+    return dict([(K,P.get('spicerun',K)) for K in _dft_conf.iterkeys()])
 
 def genNet(D, conf, outfile):
     netdir = os.path.dirname(D['net']['filename'])
@@ -148,12 +148,14 @@ class TempDir(object):
         args, kws = self._args
         import tempfile
         self.dirname = tempfile.mkdtemp(*args, **kws)
+        _log.debug("Using temp dir: %s", self.dirname)
         return self.dirname
     def __exit__(self, A, B, C):
         rmrf(self.dirname)
+        _log.debug("Removed temp dir: %s", self.dirname)
 
-def main(args, proj, h5):
-    D = loadProject(proj)
+def main(args):
+    D = loadProject(args.infile)
     conf = loadConfig(args.config)
 
     with TempDir() as outdir:
@@ -184,8 +186,15 @@ def main(args, proj, h5):
         _log.info("Aggregating output files")
 
         for raw in rawfiles:
-            A2 = spice2hdf.getargs([os.path.join(outdir,raw), h5])
+            A2 = spice2hdf.getargs([os.path.join(outdir,raw), '<<<skip>>>'])
+            A2.outfile = args.outfile
             _log.info("Process %s", A2)
             spice2hdf.main(A2)
 
     _log.info("Done")
+
+if __name__=='__main__':
+    args = getargs()
+    logging.basicConfig(format='%(asctime)s %(message)s',
+                        level=args.verbose)
+    main(args)

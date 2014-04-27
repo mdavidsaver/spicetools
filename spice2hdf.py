@@ -16,8 +16,14 @@ def h5group(**kws):
     Suitable for use with the argparse module
     """
     def typer(h5str):
+        if h5str=='<<<skip>>>':
+            return None
         fname, _, path = h5str.partition(':')
-        H = h5py.File(fname, **kws)
+        try:
+            H = h5py.File(fname, **kws)
+        except:
+            print "Error opening",fname,path
+            raise
         if path:
             return H.require_group(path)
         else:
@@ -31,8 +37,9 @@ def getargs(args):
     P.add_argument('infile', type=argparse.FileType('r'))
     P.add_argument('outfile', type=h5group())
     P.add_argument('--verbose', '-v', action='store_const', default=logging.INFO, const=logging.DEBUG)
+    P.add_argument('--quiet', '-q', action='store_const', dest='verbose', const=logging.WARN)
 
-    return P.parse_args(args=args or sys.argv)
+    return P.parse_args(args=args or sys.argv[1:])
 
 def readHeader(inp):
     """Read the ascii header common to both binary and ascii formats
