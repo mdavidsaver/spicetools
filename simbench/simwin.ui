@@ -60,9 +60,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="btnPlot">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
          <string>Plot</string>
         </property>

@@ -18,6 +18,7 @@ from .ui_simwin import Ui_SimWin
 from .expr import Expr
 from .analysis import Analysis
 from .spiceexec import SpiceRunner
+from spiceview.mainwin import ViewerWindow
 
 # match (to remove) EOL whitespace
 _trailing_space = re.compile(r'([ \t]+)$', re.MULTILINE)
@@ -41,6 +42,7 @@ class SimWin(QtGui.QMainWindow):
         self.ui.actionSaveAs.triggered.connect(self._showSaveAs)
         self.ui.actionRun.triggered.connect(self.startSim)
         self.ui.actionAbort.triggered.connect(self.sim.abort)
+        self.ui.actionPlot.triggered.connect(self._showPlot)
 
         self.ui.btnExpr.clicked.connect(self.addExpr)
         self.ui.btnSim.clicked.connect(self.addSim)
@@ -54,7 +56,7 @@ class SimWin(QtGui.QMainWindow):
         self.dia = QtGui.QFileDialog(self, "Select Spice Project",
                                      os.getcwd(),
                                      "Net/Schem. (*.sprj);;All (*)")
-        self.dia.setDefaultSuffix("sprj")
+        self.dia.setDefaultSuffix("sprj")        
 
         self.clear()
 
@@ -84,6 +86,16 @@ class SimWin(QtGui.QMainWindow):
     @QtCore.pyqtSlot(object)
     def simDone(self, results):
         _log.debug('Sim done with %s',results)
+        self.h5file = results
+        for I in ViewerWindow.instances:
+            I.reloadFile()
+
+    def _showPlot(self):
+        if self.h5file is None:
+            return
+        W = ViewerWindow()
+        W.openFile(self.h5file)
+        W.show()
 
     def addExpr(self):
         E = Expr(self.ui.topArea)
@@ -102,6 +114,7 @@ class SimWin(QtGui.QMainWindow):
             C.deleteLater()
 
         self._updateFile(None)
+        self.h5file = None
 
     @QtCore.pyqtSlot()
     def _showOpen(self):

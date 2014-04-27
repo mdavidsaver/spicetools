@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simwin.ui'
 #
-# Created: Sat Apr 26 16:41:13 2014
+# Created: Sun Apr 27 09:21:05 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,7 +39,6 @@ class Ui_SimWin(object):
         self.btnStop.setObjectName(_fromUtf8("btnStop"))
         self.horizontalLayout.addWidget(self.btnStop)
         self.btnPlot = QtGui.QPushButton(self.centralwidget)
-        self.btnPlot.setEnabled(False)
         self.btnPlot.setObjectName(_fromUtf8("btnPlot"))
         self.horizontalLayout.addWidget(self.btnPlot)
         self.status = QtGui.QLabel(self.centralwidget)
