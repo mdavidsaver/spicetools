@@ -83,13 +83,13 @@ def writeDeck(D, FP, netfile, outdir):
     for S in D.get('sims',[]):
         FP.write(_script_sim%S)
 
-        locvars = dict([(V.name,V.expr) for V in S.get('vars',[])])
+        locvars = dict([(V['name'],V['expr']) for V in S.get('vars',[])])
 
         Vars = topvars.copy()
         Vars.update(locvars)
 
         for K,V in Vars.iteritems():
-            FP.write('let %s = %s'%(K,V))
+            FP.write('let %s = %s\n'%(K,V))
 
         FP.write('write %s.raw\n'%S['name'])
         outfiles.append(('%s.raw'%S['name'], S['name']))
