@@ -186,7 +186,7 @@ def main(args):
         _log.info("Run spice")
         runSpice(D, conf, deck, outdir)
 
-        _log.info("Aggregating output files")
+        _log.info("Aggregating output files to %s", args.outfile.file.filename)
 
         for raw,grp in rawfiles:
             A2 = raw2hdf.getargs()
