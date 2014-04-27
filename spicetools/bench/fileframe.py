@@ -9,7 +9,7 @@ import os, os.path
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-from .ui_fileframe import Ui_FileFrame
+from .fileframe_ui import Ui_FileFrame
 
 class FileFrame(QtGui.QFrame):
     fileChanged = QtCore.pyqtSignal(QtCore.QString)

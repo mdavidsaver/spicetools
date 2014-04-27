@@ -11,7 +11,7 @@ from ..util import svarname
 
 from .expr import Expr
 
-from .ui_analysis import  Ui_Analysis
+from .analysis_ui import  Ui_Analysis
 
 simtip = """tran Tstep Tstop [ Tstart [ Tmax ] ] [ UIC ]
 dc Source-Name Vstart Vstop Vincr [ Source2 Vstart2 Vstop2 Vincr2 ]

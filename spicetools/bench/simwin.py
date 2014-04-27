@@ -14,7 +14,7 @@ import json, re
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-from .ui_simwin import Ui_SimWin
+from .simwin_ui import Ui_SimWin
 from .expr import Expr
 from .analysis import Analysis
 from .spiceexec import SpiceRunner

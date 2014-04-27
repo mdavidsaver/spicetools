@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'expr.ui'
+# Form implementation generated from reading ui file 'spicetools/bench/expr.ui'
 #
-# Created: Sat Apr 26 15:54:51 2014
+# Created: Sun Apr 27 13:13:01 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!

@@ -10,7 +10,7 @@ import numpy
 
 from PyQt4 import (QtGui as gui, QtCore as core)
 
-from .ui_mainwin import Ui_MainWindow
+from .mainwin_ui import Ui_MainWindow
 from ..io import loadspice
 
 class ViewerWindow(gui.QMainWindow):

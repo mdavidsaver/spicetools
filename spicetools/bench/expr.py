@@ -9,7 +9,7 @@ from PyQt4.QtCore import Qt
 
 from ..util import svarname
 
-from .ui_expr import Ui_Expr
+from .expr_ui import Ui_Expr
 
 class Expr(QtGui.QWidget):
     nameChanged = QtCore.pyqtSignal(QtCore.QString)

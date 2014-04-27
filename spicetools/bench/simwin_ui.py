@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'simwin.ui'
+# Form implementation generated from reading ui file 'spicetools/bench/simwin.ui'
 #
-# Created: Sun Apr 27 09:21:05 2014
+# Created: Sun Apr 27 13:13:00 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
