@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'spicetools/bench/simwin.ui'
 #
-# Created: Sun Apr 27 15:05:09 2014
+# Created: Sun Apr 27 15:46:46 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -106,6 +106,8 @@ class Ui_SimWin(object):
         self.actionAboutQt.setObjectName(_fromUtf8("actionAboutQt"))
         self.actionLogWindow = QtGui.QAction(SimWin)
         self.actionLogWindow.setObjectName(_fromUtf8("actionLogWindow"))
+        self.actionEditNet = QtGui.QAction(SimWin)
+        self.actionEditNet.setObjectName(_fromUtf8("actionEditNet"))
         self.menu_File.addAction(self.actionNew)
         self.menu_File.addAction(self.actionOpen)
         self.menu_File.addAction(self.actionSave)
@@ -118,6 +120,7 @@ class Ui_SimWin(object):
         self.menu_Simulation.addAction(self.actionPlot)
         self.menuHelp.addAction(self.actionAbout)
         self.menuHelp.addAction(self.actionAboutQt)
+        self.menu_Window.addAction(self.actionEditNet)
         self.menu_Window.addAction(self.actionLogWindow)
         self.menubar.addAction(self.menu_File.menuAction())
         self.menubar.addAction(self.menu_Simulation.menuAction())
@@ -160,6 +163,8 @@ class Ui_SimWin(object):
         self.actionAbout.setText(QtGui.QApplication.translate("SimWin", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAboutQt.setText(QtGui.QApplication.translate("SimWin", "aboutQt", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLogWindow.setText(QtGui.QApplication.translate("SimWin", "&Log Window", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEditNet.setText(QtGui.QApplication.translate("SimWin", "&Edit Net/Schem.", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEditNet.setShortcut(QtGui.QApplication.translate("SimWin", "Ctrl+E", None, QtGui.QApplication.UnicodeUTF8))
 
 from .fileframe import FileFrame
 from . import bench_rc

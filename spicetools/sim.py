@@ -13,16 +13,9 @@ import os, os.path, shutil
 import subprocess
 
 from .util import rmrf
+from .conf import loadConfig
 
 from . import raw2hdf
-
-_dft_conf = {
-    'gnetlist':'gnetlist',
-    'gnetlist.cmd':"%(gnetlist)s -g spice-sdb -O include_mode -O nomunge_mode -o %%(net)s %%(sch)s",
-    'spice':'ngspice',
-    'spice.cmd':'%(spice)s --no-spiceinit --pipe %%(deck)s',
-}
-
 
 def getargs(args=None):
     from .run import h5group, addCommonArgs
@@ -50,20 +43,6 @@ def loadProject(FP):
     if _log.isEnabledFor(logging.DEBUG):
         _log.debug("D: %s", D)
     return D
-
-def loadConfig(FP=None):
-    from ConfigParser import SafeConfigParser as ConfigParser
-    P = ConfigParser(defaults=_dft_conf)
-    P.add_section('spicerun')
-    P.read([
-        '/etc/spicerun.conf',
-        os.path.expanduser('~/.config/spicetools/spicerun.conf'),
-        'spicerun.conf'
-    ])
-    if FP:
-        P.readfp(FP)
-
-    return dict([(K,P.get('spicerun',K)) for K in _dft_conf.iterkeys()])
 
 def genNet(D, conf, outfile):
     netdir = os.path.dirname(D['net']['filename'])
@@ -155,7 +134,7 @@ class TempDir(object):
 
 def main(args):
     D = loadProject(args.infile)
-    conf = loadConfig(args.config)
+    conf = loadConfig(args.config, 'spicerun')
 
     with TempDir() as outdir:
         _log.debug("Temp dir %s", outdir)

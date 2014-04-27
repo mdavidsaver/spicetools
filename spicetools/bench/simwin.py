@@ -21,6 +21,7 @@ from .spiceexec import SpiceRunner
 from ..log.logwin import LogWin
 
 from ..view.mainwin import ViewerWindow
+from ..conf import loadConfig
 
 # match (to remove) EOL whitespace
 _trailing_space = re.compile(r'([ \t]+)$', re.MULTILINE)
@@ -45,6 +46,7 @@ class SimWin(QtGui.QMainWindow):
         self.ui.actionRun.triggered.connect(self.startSim)
         self.ui.actionAbort.triggered.connect(self.sim.abort)
         self.ui.actionPlot.triggered.connect(self._showPlot)
+        self.ui.actionEditNet.triggered.connect(self._editNet)
 
         self.ui.btnExpr.clicked.connect(self.addExpr)
         self.ui.btnSim.clicked.connect(self.addSim)
@@ -112,6 +114,28 @@ class SimWin(QtGui.QMainWindow):
     def addSim(self):
         A = Analysis(self.ui.topArea)
         self.ui.topArea.layout().insertWidget(0,A)
+
+    def _editNet(self):
+        if not self.ui.fileFrame.file:
+            return
+        fname = os.path.join(os.path.dirname(os.path.join(os.getcwd(),
+                                                          str(self.fname or ''))),
+                             str(self.ui.fileFrame.file))
+        if not os.path.isfile(fname):
+            return
+
+        D = loadConfig(section='simbench')
+        if self.ui.fileFrame.type:
+            cmd = D['gschem.cmd']
+        else:
+            cmd = D['editor.cmd']
+
+        cmd = cmd%{'file':fname}
+
+        _log.debug("Starting: %s", cmd)
+
+        if not QtCore.QProcess.startDetached(cmd):
+            _log.error("Failed to start: %s", cmd)
 
     @QtCore.pyqtSlot()
     def clear(self):

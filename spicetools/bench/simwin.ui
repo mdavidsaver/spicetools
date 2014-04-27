@@ -155,6 +155,7 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
+    <addaction name="actionEditNet"/>
     <addaction name="actionLogWindow"/>
    </widget>
    <addaction name="menu_File"/>
@@ -238,6 +239,14 @@
   <action name="actionLogWindow">
    <property name="text">
     <string>&amp;Log Window</string>
+   </property>
+  </action>
+  <action name="actionEditNet">
+   <property name="text">
+    <string>&amp;Edit Net/Schem.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>
