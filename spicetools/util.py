@@ -25,19 +25,46 @@ def rmrf(dname):
     os.rmdir(dname)
 
 class TempDir(object):
+    """Temporary directory manager.
+    
+    Can function either as a standalone object,
+    or as a Context Manager.  In the second role
+    the directory is deleted at the end of the context.
+    
+    Otherwise, either the remove() method must be called
+    for each instance, or the cleanup() class method
+    must be called (typically in a finally statement).
+    
+    TempDir(...)
+    
+    Ctor arguments are passed to tempfile.mkdtemp
+    """
     dirs = weakref.WeakKeyDictionary()
 
     def __init__(self, *args, **kws):
+        self._args, self.dirname = (args, kws), None
+        self.dirs[self] = None
+
+    def create(self):
+        self.remove()
+        args, kws = self._args
         self.dirname = tempfile.mkdtemp(*args, **kws)
         _log.info("Creating temp. directory: %s", self.dirname)
-        self.dirs[self] = self.dirname
+        return self
+    open = create
+
     def remove(self):
         if self.dirname is not None:
             _log.info("Removing temp. directory: %s", self.dirname)
             rmrf(self.dirname)
             self.dirname = None
     close = remove
-    def __del__(self):
+
+    def __enter__(self):
+        if self.dirname is None:
+            self.create()
+        return self.dirname
+    def __exit__(self, A, B, C):
         self.remove()
 
     @classmethod

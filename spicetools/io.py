@@ -7,10 +7,17 @@ License is GPL3+, see file LICENSE for details
 import logging
 _log = logging.getLogger(__name__)
 
+import os.path, weakref
+
 import numpy
 import h5py
 
-import spice2hdf
+from . import raw2hdf
+
+__all__ = [
+    'loadspice',
+    'readhdf5',
+]
 
 # Operations on numpy vectors (ndarray.dtype.kind)
 _dataops = {
@@ -54,19 +61,45 @@ class VectorSet(dict):
         return op(self[col])
 
 def loadspice(fname):
+    """Read a spice raw file or HDF5
+    
+    Input is a string describing a spice raw or HDF5 file.
+    """
+    if fname.find(':')!=-1 and not os.path.isfile(fname):
+        # an HDF5 file with group specifier
+        fname, _, grp = fname.partition(':')
+        F = h5py.File(fname)
+        return readhdf5(F.require_group(grp))
+
+    # magic detection of HDF5
     with open(fname,'rb') as F:
         fid = F.read(4)
-    if fid=='\x89HDF':
-        return readhdf5(fname)
-    else:
-        return readspice(fname)
+        if fid!='\x89HDF':
+            F.seek(0)
+            return readspice(F)
+
+    return readhdf5(fname)
+
+def _autoclose(F):
+    F.close()
 
 def readhdf5(fname):
+    """Process an HDF5 file and return a vectorset File
+    
+    Input is either a string naming an HDF5 w/ optional group
+    (eg. "file.h5:/grp"), or an already opened Group object.
+    """
     _log.debug("Reading: %s", fname)
-    F = h5py.File(fname,'r')
+    if isinstance(fname, h5py.Group):
+        F = fname
+    else:
+        fname, _, grp = fname.partition(':')
+        F = h5py.File(fname,'r')
+        if grp:
+            F = F.require_group(grp)
+
     grps=[]
     def collect(name, obj, grps=grps):
-        _log.debug("Visitx: %s", obj)
         if not isinstance(obj, h5py.Group):
             return
         _log.debug("Visit group %s (%s)", obj, obj.attrs)
@@ -83,11 +116,21 @@ def readhdf5(fname):
                       dict(grp.attrs))
         vectors[grp.name] = V
 
-    return File(fname, vectors)
+    R = File(F.file.filename, vectors)
+    R._autoclose = weakref.ref(F.file, _autoclose)
+    return R
 
 def readspice(fname):
-    with open(fname, 'rb') as F:
-        data, header = spice2hdf.loadspice(F)
+    """Process an spice raw file and return a vectorset File
+
+    Input is either a string naming an file, or an
+    already opened file object.
+    """
+    if hasattr(fname, 'read'):
+        data, header = raw2hdf.loadspice(fname)
+    else:
+        with open(fname, 'rb') as F:
+            data, header = raw2hdf.loadspice(F)
     labels = [V[0] for V in header['variables']]
 
     V = VectorSet(data, labels, header)
