@@ -141,4 +141,4 @@ class Ui_MainWindow(object):
         self.actionCloneWindow.setText(QtGui.QApplication.translate("MainWindow", "Clone Wi&ndow", None, QtGui.QApplication.UnicodeUTF8))
 
 from .plotarea import PlotArea
-import viewer_rc
+from . import viewer_rc

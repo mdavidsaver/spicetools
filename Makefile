@@ -3,6 +3,8 @@ all: realall
 PYUIC=pyuic4
 PYRCC=pyrcc4
 
+UICFLAGS += --from-imports
+
 UIS += spicetools/bench/simwin.ui
 UIS += spicetools/bench/fileframe.ui
 UIS += spicetools/bench/expr.ui
