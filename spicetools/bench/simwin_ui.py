@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'spicetools/bench/simwin.ui'
 #
-# Created: Sun Apr 27 13:13:00 2014
+# Created: Sun Apr 27 13:40:38 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,9 @@ class Ui_SimWin(object):
     def setupUi(self, SimWin):
         SimWin.setObjectName(_fromUtf8("SimWin"))
         SimWin.resize(486, 488)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/bench.svg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        SimWin.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(SimWin)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -72,6 +75,8 @@ class Ui_SimWin(object):
         self.menu_File.setObjectName(_fromUtf8("menu_File"))
         self.menu_Simulation = QtGui.QMenu(self.menubar)
         self.menu_Simulation.setObjectName(_fromUtf8("menu_Simulation"))
+        self.menuHelp = QtGui.QMenu(self.menubar)
+        self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         SimWin.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(SimWin)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -92,6 +97,11 @@ class Ui_SimWin(object):
         self.actionAbort.setObjectName(_fromUtf8("actionAbort"))
         self.actionPlot = QtGui.QAction(SimWin)
         self.actionPlot.setObjectName(_fromUtf8("actionPlot"))
+        self.actionAbout = QtGui.QAction(SimWin)
+        self.actionAbout.setIcon(icon)
+        self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+        self.actionAboutQt = QtGui.QAction(SimWin)
+        self.actionAboutQt.setObjectName(_fromUtf8("actionAboutQt"))
         self.menu_File.addAction(self.actionNew)
         self.menu_File.addAction(self.actionOpen)
         self.menu_File.addAction(self.actionSave)
@@ -102,8 +112,11 @@ class Ui_SimWin(object):
         self.menu_Simulation.addAction(self.actionAbort)
         self.menu_Simulation.addSeparator()
         self.menu_Simulation.addAction(self.actionPlot)
+        self.menuHelp.addAction(self.actionAbout)
+        self.menuHelp.addAction(self.actionAboutQt)
         self.menubar.addAction(self.menu_File.menuAction())
         self.menubar.addAction(self.menu_Simulation.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(SimWin)
         QtCore.QObject.connect(self.actionExit, QtCore.SIGNAL(_fromUtf8("triggered()")), SimWin.close)
@@ -122,6 +135,7 @@ class Ui_SimWin(object):
         self.status.setText(QtGui.QApplication.translate("SimWin", "<Status>", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_File.setTitle(QtGui.QApplication.translate("SimWin", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_Simulation.setTitle(QtGui.QApplication.translate("SimWin", "&Simulation", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelp.setTitle(QtGui.QApplication.translate("SimWin", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setText(QtGui.QApplication.translate("SimWin", "&New", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setShortcut(QtGui.QApplication.translate("SimWin", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setText(QtGui.QApplication.translate("SimWin", "&Open", None, QtGui.QApplication.UnicodeUTF8))
@@ -136,5 +150,8 @@ class Ui_SimWin(object):
         self.actionAbort.setText(QtGui.QApplication.translate("SimWin", "Abort", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPlot.setText(QtGui.QApplication.translate("SimWin", "&Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPlot.setShortcut(QtGui.QApplication.translate("SimWin", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout.setText(QtGui.QApplication.translate("SimWin", "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAboutQt.setText(QtGui.QApplication.translate("SimWin", "aboutQt", None, QtGui.QApplication.UnicodeUTF8))
 
 from .fileframe import FileFrame
+from . import bench_rc

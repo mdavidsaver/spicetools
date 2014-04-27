@@ -52,6 +52,9 @@ class SimWin(QtGui.QMainWindow):
         self.sim.done.connect(self.simDone)
         self.sim.stateChanged.connect(self.ui.status.setText)
 
+        self.ui.actionAboutQt.triggered.connect(QtGui.QApplication.instance().aboutQt)
+        self.ui.actionAbout.triggered.connect(self.about)
+
         self.ui.status.setText(self.sim.state)
 
         self.dia = QtGui.QFileDialog(self, "Select Spice Project",
@@ -256,3 +259,19 @@ class SimWin(QtGui.QMainWindow):
                     sims.append(S)
 
         return result
+
+    @QtCore.pyqtSlot()
+    def about(self):
+        QtGui.QMessageBox.about(self, "About SpiceBench",_about)
+
+
+_about="""<h2>SpiceBench</h2>
+<p>ngspice simulation controller 1.0
+</p>
+<p>Names a netlist or gschem file and lists analyses
+which will be preformed on it.
+</p>
+<p>Copyright 2014, Michael Davidsaver &lt;mdavidsaver@gmail.com&gt;.
+License GPL3+
+</p>
+"""

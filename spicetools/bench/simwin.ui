@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="bench.qrc">
+    <normaloff>:/bench.svg</normaloff>:/bench.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -140,8 +144,16 @@
     <addaction name="separator"/>
     <addaction name="actionPlot"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Simulation"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
@@ -202,6 +214,20 @@
     <string>Ctrl+P</string>
    </property>
   </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="bench.qrc">
+     <normaloff>:/bench.svg</normaloff>:/bench.svg</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>aboutQt</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -211,7 +237,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="bench.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionExit</sender>

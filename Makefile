@@ -11,6 +11,7 @@ UIS += spicetools/bench/expr.ui
 UIS += spicetools/bench/analysis.ui
 UIS += spicetools/view/mainwin.ui
 
+RCS += spicetools/bench/bench.qrc
 RCS += spicetools/view/viewer.qrc
 
 GEN_UIS = $(UIS:%.ui=%_ui.py)
