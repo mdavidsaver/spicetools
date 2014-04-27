@@ -8,38 +8,37 @@ import logging
 _L = logging.getLogger(__name__)
 
 import numpy as np
-import h5py
 
-def h5group(**kws):
-    """Process file:group/path and return a writable H5PY Group object
+from .run import h5group, addCommonArgs
 
-    Suitable for use with the argparse module
-    """
-    def typer(h5str):
-        if h5str=='<<<skip>>>':
-            return None
-        fname, _, path = h5str.partition(':')
-        try:
-            H = h5py.File(fname, **kws)
-        except:
-            print "Error opening",fname,path
-            raise
-        if path:
-            return H.require_group(path)
-        else:
-            return H
-    return typer
+_DESC="""Convert ngspice output files to a hdf5 format.
 
-def getargs(args):
-    import argparse, sys
+An example of storing 3 vector sets in one HDF5 file
+for later plotting with spiceviewer
+$ ngspice ...
+ dc ...
+ write dc1.raw
+ dc ...
+ write dc2.raw
+ ac ...
+ write ac1.raw
+ quit
+$ %(prog)s dc1.raw out.h5:/dc1
+$ %(prog)s dc2.raw out.h5:/dc2
+$ %(prog)s ac1.raw out.h5:/ac1
+"""
 
-    P = argparse.ArgumentParser(description='Convert ngspice output files to a hdf5 format')
-    P.add_argument('infile', type=argparse.FileType('r'))
-    P.add_argument('outfile', type=h5group())
-    P.add_argument('--verbose', '-v', action='store_const', default=logging.INFO, const=logging.DEBUG)
-    P.add_argument('--quiet', '-q', action='store_const', dest='verbose', const=logging.WARN)
+def getargs():
+    import argparse
 
-    return P.parse_args(args=args or sys.argv[1:])
+    P = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+    P.description = _DESC%{'prog':P.prog}
+    P.add_argument('infile', type=argparse.FileType('r'), metavar='in.raw',
+                   help="A spice ascii or binary output data file")
+    P.add_argument('outfile', type=h5group(), metavar='out.h5[:/a/b]',
+                   help="An HDF5 with optional H5 Group ('/' if omitted)")
+    addCommonArgs(P)
+    return P
 
 def readHeader(inp):
     """Read the ascii header common to both binary and ascii formats
@@ -213,9 +212,3 @@ def main(args):
         readAscii(args.infile, OS)
     else:
         raise ValueError('Missing format tag')
-
-if __name__=='__main__':
-    args = getargs()
-    logging.basicConfig(format='%(levelname)s:%(message)s',
-                        level=args.verbose)
-    main(args)
