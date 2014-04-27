@@ -21,9 +21,6 @@ class FileFrame(QtGui.QFrame):
         self.ui = Ui_FileFrame()
         self.ui.setupUi(self)
 
-        self._file = None
-        self._schem = False
-
         self.dia = QtGui.QFileDialog(self, "Select Net of Schem.",
                                      os.getcwd(),
                                      "Net/Schem. (*.net *.sch);;All (*)")
@@ -34,6 +31,10 @@ class FileFrame(QtGui.QFrame):
         self.ui.fileBox.activated.connect(self._fileChange)
 
         self.ui.typeBox.currentIndexChanged.connect(self._typeChanged)
+
+    def clear(self):
+        self.setFile('')
+        self.setType(True)
 
     def _fileChange(self):
         self.fileChanged.emit(self.ui.fileBox.currentText())

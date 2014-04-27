@@ -153,8 +153,11 @@ class SimWin(QtGui.QMainWindow):
                 continue
             C.deleteLater()
 
+        self.ui.fileFrame.clear()
+
         self._updateFile(None)
         self.h5file = None
+        _log.info("Clear bench")
 
     @QtCore.pyqtSlot()
     def _showOpen(self):
@@ -191,6 +194,8 @@ class SimWin(QtGui.QMainWindow):
                 fname = self._showSaveAs(_recurse=True)
         if fname is None:
             return
+        elif not _recurse:
+            self._updateFile(fname)
 
         self.save(fname)
 
