@@ -40,6 +40,9 @@ class LogWin(QtGui.QMainWindow):
         self.ui = Ui_LogWin()
         self.ui.setupUi(self)
 
+        self.ui.log.setMaximumBlockCount(200)
+        self.ui.log.setCenterOnScroll(True)
+
         self.settings = QtCore.QSettings("spicetools", "benchui")
         self.restoreGeometry(self.settings.value("logwindow/geometry").toByteArray())
 
@@ -74,11 +77,13 @@ class LogWin(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def clear(self):
         self._Q = []
+        self.ui.log.setPlainText('')
         self.write("clear")
 
     def write(self, msg):
+        if len(self._Q)>100:
+            return # overflow...
         self._Q.append(msg.rstrip())
-        self._Q = self._Q[-100:]
 
         if not self.timer:
             self.startTimer(100)
@@ -92,8 +97,9 @@ class LogWin(QtGui.QMainWindow):
         self.killTimer(evt.timerId())
         evt.accept()
 
-        self.ui.log.setPlainText('\n'.join(self._Q))
+        for msg in self._Q:
+            self.ui.log.appendPlainText(msg)
 
     def _saveLog(self, fname):
         with open(str(fname), 'w') as F:
-            F.write('\n'.join(self._Q))
+            F.write(self.ui.log.toPlainText())
