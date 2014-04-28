@@ -37,9 +37,9 @@ def loadProject(FP):
     D = json.load(FP)
     if not isinstance(D, dict) or 'net' not in D or D.get('version',0)!=1:
         raise ValueError("Invalid file contents: %s"%FP.name)
-    # expand paths to absolute
-    D['projectdir'] = os.path.abspath(os.path.dirname(FP.name))
-    D['net']['filename'] = os.path.join(D['projectdir'], D['net']['filename'])
+    # expand paths to absolute (already done by simwin)
+    #D['projectdir'] = os.path.abspath(os.path.dirname(FP.name))
+    #D['net']['filename'] = os.path.join(D['projectdir'], D['net']['filename'])
     if _log.isEnabledFor(logging.DEBUG):
         _log.debug("D: %s", D)
     return D
@@ -107,7 +107,10 @@ def writeDeck(D, FP, netfile, outdir):
 
     for S in D.get('sims',[]):
         FP.write(_script_sim%S)
+        if S['line'].strip()=='op':
+            FP.write('print all\n')
 
+        #TODO: Preserve order
         locvars = dict([(V['name'],V['expr']) for V in S.get('vars',[])])
 
         Vars = topvars.copy()

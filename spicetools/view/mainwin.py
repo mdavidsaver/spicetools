@@ -4,6 +4,9 @@ Copyright (C) 2014 Michael Davidsaver
 License is GPL3+, see file LICENSE for details
 """
 
+import logging
+_log=logging.getLogger(__name__)
+
 import os, traceback
 
 import numpy
@@ -71,7 +74,7 @@ class ViewerWindow(gui.QMainWindow):
 
     @core.pyqtSlot(str)
     def open(self, fname):
-        print 'Open file',fname
+        _log.info('Open file: %s',fname)
 
         fname = str(fname)
         try:
@@ -132,7 +135,7 @@ class ViewerWindow(gui.QMainWindow):
     @core.pyqtSlot()
     def switchSet(self):
         S = str(self.ui.sets.currentText())
-        print 'switch to vector set',S
+        _log.debug('switch to vector set: %s',S)
         if not S:
             return
 
@@ -185,7 +188,7 @@ class ViewerWindow(gui.QMainWindow):
     def updateTraces(self):
         if self.nodraw:
             return
-        print 'update'
+        _log.debug('update traces')
         op = str(self.ui.ops.currentText())
         S = str(self.ui.sets.currentText())
         X = str(self.ui.xaxis.currentText())
@@ -197,7 +200,7 @@ class ViewerWindow(gui.QMainWindow):
 
         Vs = self.fset[S]
 
-        print 'Plot',S,X,items
+        _log.debug('Plot %s %s %s',S,X,items)
         xdata = numpy.real(Vs[X])
         ydata = [Vs.value(n,op) for n in items]
 
