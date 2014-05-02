@@ -35,6 +35,8 @@ class SimWin(QtGui.QMainWindow):
         self.ui = Ui_SimWin()
         self.ui.setupUi(self)
 
+        self.log = LogWin()
+
         self.settings = QtCore.QSettings("spicetools", "benchui")
         self.restoreGeometry(self.settings.value("mainwindow/geometry").toByteArray())
 
@@ -55,14 +57,12 @@ class SimWin(QtGui.QMainWindow):
         self.ui.btnSim.clicked.connect(self.addSim)
 
         self.requestStart.connect(self.sim.startSim)
-        self.requestStart.connect(LogWin.clearLog)
+        self.requestStart.connect(self.log.clear)
         self.sim.done.connect(self.simDone)
         self.sim.stateChanged.connect(self.ui.status.setText)
 
-        self.ui.actionLogWindow.triggered.connect(LogWin.showLog)
-        LogWin.createLog()
-        if self.settings.value("mainwindow/showlog", False).toBool():
-            LogWin.showLog()
+        self.ui.actionLogWindow.triggered.connect(self.log.show)
+        self.log.setVisible(self.settings.value("mainwindow/showlog", False).toBool())
 
         self.ui.actionAboutQt.triggered.connect(QtGui.QApplication.instance().aboutQt)
         self.ui.actionAbout.triggered.connect(self.about)
@@ -87,7 +87,8 @@ class SimWin(QtGui.QMainWindow):
     def closeEvent(self, evt):
         self.ui.actionAbort.trigger()
         self.settings.setValue("mainwindow/geometry", self.saveGeometry())
-        self.settings.setValue("mainwindow/showlog", LogWin.visibleLog())
+        self.settings.setValue("mainwindow/showlog", self.log.isVisible())
+        self.log.sync()
         self.settings.sync()
         evt.accept()
 

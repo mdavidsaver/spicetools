@@ -50,29 +50,6 @@ class ErrorHighlight(QtGui.QSyntaxHighlighter):
             print 'Error highlighting',S
 
 class LogWin(QtGui.QMainWindow):
-    instance = None
-
-    @classmethod
-    def createLog(cls):
-        if cls.instance is None:
-            cls.instance = cls()
-
-    @classmethod
-    @QtCore.pyqtSlot()
-    def showLog(cls):
-        cls.createLog()
-        cls.instance.show()
-
-    @classmethod
-    @QtCore.pyqtSlot()
-    def clearLog(cls):
-        cls.createLog()
-        cls.instance.clear()
-
-    @classmethod
-    def visibleLog(cls):
-        return cls.instance is not None and cls.instance.isVisible()
-
     def __init__(self):
         super(LogWin,self).__init__()
         self.setAttribute(QtCore.Qt.WA_QuitOnClose, False)
@@ -86,8 +63,6 @@ class LogWin(QtGui.QMainWindow):
         self._H = ErrorHighlight(doc)
 
         self._C = QtGui.QTextCursor(doc)
-
-        QtGui.QApplication.instance().aboutToQuit.connect(self.sync)
 
         self.settings = QtCore.QSettings("spicetools", "benchui")
         self.restoreGeometry(self.settings.value("logwindow/geometry").toByteArray())
@@ -118,12 +93,10 @@ class LogWin(QtGui.QMainWindow):
     def sync(self):
         self.settings.setValue("logwindow/geometry", self.saveGeometry())
         self.settings.setValue("logwindow/autoclear", self.ui.autoClr.isChecked())
-        self.settings.sync()
 
     def closeEvent(self, evt):
         root = logging.getLogger()
         root.removeHandler(self._H)
-        self.instance = None
         evt.accept()
 
     def clear(self):
