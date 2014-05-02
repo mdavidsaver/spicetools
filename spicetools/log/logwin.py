@@ -14,11 +14,13 @@ from PyQt4 import QtCore, QtGui
 
 from .logwin_ui import Ui_LogWin
 
-_error = re.compile('\s*error.*', re.IGNORECASE)
+_error = re.compile('.*(?:error|warning).*', re.IGNORECASE)
 
 class ErrorHighlight(QtGui.QSyntaxHighlighter):
     _formaters = [
         ('Process Read:', {'setFontWeight':QtGui.QFont.Bold}),
+        ('warning.*', {'setFontWeight':QtGui.QFont.Bold,
+                     'setForeground':QtCore.Qt.red}),
         ('error.*', {'setFontWeight':QtGui.QFont.Bold,
                      'setForeground':QtCore.Qt.red}),
     ]
