@@ -17,8 +17,11 @@ from .mainwin_ui import Ui_MainWindow
 from ..io import loadspice
 
 class ViewerWindow(gui.QMainWindow):
+    instances = set()
+
     def __init__(self):
         gui.QMainWindow.__init__(self)
+        self.setAttribute(core.Qt.WA_DeleteOnClose, True)
 
         app = gui.QApplication.instance()
 
@@ -53,23 +56,16 @@ class ViewerWindow(gui.QMainWindow):
         self.saveSet = self.saveX = self.saveY = self.saveOp = None
         self.nodraw = False
 
-    instances = set()
-
-    def showEvent(self, evt):
-        # keep visible windows from being GC'd
+        self.destroyed.connect(self._dropRef)
         self.instances.add(self)
-        evt.accept()
 
     def _dropRef(self):
-        self.instances.remove(self)
+        if self in self.instances:
+            self.instances.remove(self)
 
     def closeEvent(self, evt):
         self.settings.setValue("viewerwindow/geometry", self.saveGeometry())
         self.settings.sync()
-
-        self.destroyed.connect(self._dropRef)
-        self.deleteLater()
-
         evt.accept()
 
     @core.pyqtSlot(str)
@@ -211,7 +207,8 @@ class ViewerWindow(gui.QMainWindow):
     @core.pyqtSlot()
     def newWin(self):
         W = ViewerWindow()
-        W.loadData(self.fset)
+        if self.fset:
+            W.loadData(self.fset)
         W.show()
 
     @core.pyqtSlot()
