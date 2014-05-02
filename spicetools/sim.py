@@ -12,7 +12,7 @@ import os, os.path, shutil
 
 import subprocess, re
 
-from .util import rmrf
+from .util import TempDir
 from .conf import loadConfig
 
 from . import raw2hdf
@@ -159,19 +159,6 @@ quit
 .endc
 .end
 """
-
-class TempDir(object):
-    def __init__(self, *args, **kws):
-        self._args = (args, kws)
-    def __enter__(self):
-        args, kws = self._args
-        import tempfile
-        self.dirname = tempfile.mkdtemp(*args, **kws)
-        _log.debug("Using temp dir: %s", self.dirname)
-        return self.dirname
-    def __exit__(self, A, B, C):
-        rmrf(self.dirname)
-        _log.debug("Removed temp dir: %s", self.dirname)
 
 def main(args):
     D = loadProject(args.infile)
