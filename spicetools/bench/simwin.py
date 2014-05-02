@@ -41,6 +41,7 @@ class SimWin(QtGui.QMainWindow):
         self.restoreGeometry(self.settings.value("mainwindow/geometry").toByteArray())
 
         QtGui.QVBoxLayout(self.ui.topArea)
+        self.ui.topArea.layout().insertStretch(0)
 
         self.sim = SpiceRunner(self)
 
@@ -257,12 +258,12 @@ class SimWin(QtGui.QMainWindow):
         for V in topvars:
             E = Expr(self.ui.topArea)
             E.pyqtConfigure(name=V['name'], expr=V['expr'])
-            L.addWidget(E)
+            L.insertWidget(0, E)
 
         for S in sims:
             A = Analysis(self.ui.topArea)
             A.pyqtConfigure(name=S['name'], sim=S['line'])
-            L.addWidget(A)
+            L.insertWidget(0, A)
 
             SW = A.exprWidget()
             SL = SW.layout()
@@ -271,7 +272,7 @@ class SimWin(QtGui.QMainWindow):
             for V in S.get('vars',[]):
                 E = Expr(SW)
                 E.pyqtConfigure(name=V['name'], expr=V['expr'])
-                SL.addWidget(E)
+                SL.insertWidget(0, E)
 
     def todict(self):
         result = {'version':1,

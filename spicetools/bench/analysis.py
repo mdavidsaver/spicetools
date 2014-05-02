@@ -30,6 +30,7 @@ class Analysis(QtGui.QWidget):
         self.ui.setupUi(self)
 
         QtGui.QVBoxLayout(self.ui.frame)
+        self.ui.frame.layout().insertStretch(0)
 
         self.ui.btnDel.clicked.connect(self.deleteLater)
         self.ui.btnExpr.clicked.connect(self.addExpr)
