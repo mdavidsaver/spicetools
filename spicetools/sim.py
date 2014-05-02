@@ -143,8 +143,6 @@ def writeDeck(D, FP, netfile, outdir):
 _script_header = """* %(netfile)s
 .control
 set filetype = binary
-set sourcepath = ( %(netdir)s $sourcepath )
-echo sourcepath = $sourcepath
 echo "Loading Netlist"
 shell ls -l
 source generated.net
