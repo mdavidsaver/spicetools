@@ -9,7 +9,7 @@ They may work with other *spice variants.
 And spiceviewer will plot simulation results.
 
 All require python (>=2.7, <3.0) and the h5py module.
-SpiceViewer and SpiceBench also requires PyQt4.
+SpiceViewer and SpiceBench also requires PyQt4 and matplotlib.
 
 SpiceBench
 ----------
