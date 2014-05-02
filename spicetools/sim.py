@@ -16,6 +16,7 @@ from .util import TempDir
 from .conf import loadConfig
 
 from . import raw2hdf
+from .run import UserError
 
 def getargs(args=None):
     from .run import h5group, addCommonArgs
@@ -99,7 +100,8 @@ def genNet(D, conf, outfile):
     _log.debug("In: %s",netdir)
     _log.debug("Running: '%s'", cmd)
 
-    subprocess.check_call(cmd, shell=True, cwd=netdir)
+    if subprocess.call(cmd, shell=True, cwd=netdir):
+        raise UserError("gnetlist run failed\nIn: %s\nRunning %s"%(netdir, cmd))
 
 def runSpice(D, conf, deck, outdir):
     A = {
@@ -110,7 +112,8 @@ def runSpice(D, conf, deck, outdir):
     _log.debug("In: %s",outdir)
     _log.debug("Running: '%s'", cmd)
 
-    subprocess.check_call(cmd, shell=True, cwd=outdir)
+    if subprocess.call(cmd, shell=True, cwd=outdir):
+        raise UserError("Spice run failed\nIn: %s\nRunning %s"%(outdir, cmd))
 
 def writeDeck(D, FP, netfile, outdir):
 

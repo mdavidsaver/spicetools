@@ -11,6 +11,9 @@ __all__ = [
     'runGUI',
 ]
 
+class UserError(Exception):
+    pass
+
 def h5group(**kws):
     """Process file:group/path and return a writable H5PY Group object
 
@@ -85,6 +88,8 @@ def runCLI(mod):
     from .util import TempDir
     try:
         mod.main(opts)
+    except UserError as e:
+        logging.error('Error: %s:'%e.message)
     finally:
         TempDir.cleanup()
 
