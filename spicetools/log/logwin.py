@@ -8,12 +8,46 @@ import logging
 # We don't log to avoid loops
 #_log=logging.getLogger(__name__)
 
-import os
+import os, traceback, re
 
 from PyQt4 import QtCore, QtGui
 
 from .logwin_ui import Ui_LogWin
-            
+
+_error = re.compile('\s*error.*', re.IGNORECASE)
+
+class ErrorHighlight(QtGui.QSyntaxHighlighter):
+    _formaters = [
+        ('Process Read:', {'setFontWeight':QtGui.QFont.Bold}),
+        ('error.*', {'setFontWeight':QtGui.QFont.Bold,
+                     'setForeground':QtCore.Qt.red}),
+    ]
+    def __init__(self, *args):
+        super(ErrorHighlight, self).__init__(*args)
+
+        self.formaters = []
+        for pat, As in self._formaters:
+            R = QtCore.QRegExp(pat)
+            R.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+            fmt = QtGui.QTextCharFormat()
+            for K,V in As.iteritems():
+                F = getattr(fmt, K)
+                F(V)
+            self.formaters.append((R,fmt))
+
+    def highlightBlock(self, S):
+        try:
+            for R, F in self.formaters:
+                idx = R.indexIn(S)
+                while idx>=0:
+                    mlen = R.matchedLength()
+                    assert mlen>0,'oops %s'%mlen
+                    self.setFormat(idx, mlen, F)
+                    idx = R.indexIn(S, idx+mlen)
+        except:
+            # trap exceptions here to prevent recursion in logging
+            traceback.print_exc()
+            print 'Error highlighting',S
 
 class LogWin(QtGui.QMainWindow):
     instance = None
@@ -40,8 +74,12 @@ class LogWin(QtGui.QMainWindow):
         self.ui = Ui_LogWin()
         self.ui.setupUi(self)
 
-        self.ui.log.setMaximumBlockCount(200)
-        self.ui.log.setCenterOnScroll(True)
+        doc = self.ui.log.document()
+        doc.setMaximumBlockCount(1000)
+
+        self._H = ErrorHighlight(doc)
+
+        self._C = QtGui.QTextCursor(doc)
 
         self.settings = QtCore.QSettings("spicetools", "benchui")
         self.restoreGeometry(self.settings.value("logwindow/geometry").toByteArray())
@@ -66,6 +104,8 @@ class LogWin(QtGui.QMainWindow):
         root.addHandler(self._H)
         self.timer = False
 
+        self._errors = 0
+
     def closeEvent(self, evt):
         root = logging.getLogger()
         root.removeHandler(self._H)
@@ -79,6 +119,8 @@ class LogWin(QtGui.QMainWindow):
         self._Q = []
         self.ui.log.setPlainText('')
         self.write("clear")
+        self._errors = 0
+        self.ui.errCnt.setText('0')
 
     def write(self, msg):
         if len(self._Q)>100:
@@ -93,12 +135,33 @@ class LogWin(QtGui.QMainWindow):
         pass
 
     def timerEvent(self, evt):
-        self.timer = False
-        self.killTimer(evt.timerId())
-        evt.accept()
+        try:
+            Q, self._Q = self._Q, []
 
-        for msg in self._Q:
-            self.ui.log.appendPlainText(msg)
+            self.timer = False
+            self.killTimer(evt.timerId())
+
+            # break multi-line log messages into individual lines
+            L = []
+            for q in map(str.splitlines, Q):
+                L.extend(q)
+
+            self._C.beginEditBlock()
+            self._C.clearSelection()
+            for msg in L:
+                if _error.match(msg):
+                    self._errors += 1
+                self._C.insertText(msg+'\n')
+            self._C.endEditBlock()
+            self.ui.log.ensureCursorVisible()
+
+            self.ui.errCnt.setText(str(self._errors))
+
+            evt.accept()
+        except:
+            # trap exceptions here to prevent recursion in logging
+            traceback.print_exc()
+            print 'Error updating log'
 
     def _saveLog(self, fname):
         with open(str(fname), 'w') as F:

@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QPlainTextEdit" name="log">
+     <widget class="QTextEdit" name="log">
       <property name="readOnly">
        <bool>true</bool>
       </property>
@@ -24,6 +24,20 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Errors:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="errCnt">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
