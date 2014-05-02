@@ -42,6 +42,7 @@ class Ui_FileFrame(object):
         self.fileBox.setObjectName(_fromUtf8("fileBox"))
         self.horizontalLayout.addWidget(self.fileBox)
         self.fileBtn = QtGui.QPushButton(FileFrame)
+        self.fileBtn.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.fileBtn.setObjectName(_fromUtf8("fileBtn"))
         self.horizontalLayout.addWidget(self.fileBtn)
 

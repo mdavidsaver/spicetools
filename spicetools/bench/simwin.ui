@@ -141,8 +141,6 @@
     </property>
     <addaction name="actionRun"/>
     <addaction name="actionAbort"/>
-    <addaction name="separator"/>
-    <addaction name="actionPlot"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -156,6 +154,7 @@
      <string>&amp;Window</string>
     </property>
     <addaction name="actionEditNet"/>
+    <addaction name="actionPlot"/>
     <addaction name="actionLogWindow"/>
    </widget>
    <addaction name="menu_File"/>

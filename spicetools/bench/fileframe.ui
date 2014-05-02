@@ -65,6 +65,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="fileBtn">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
+     </property>
      <property name="text">
       <string>&lt;-</string>
      </property>
