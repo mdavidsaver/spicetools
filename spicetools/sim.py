@@ -37,34 +37,56 @@ def loadProject(FP):
     D = json.load(FP)
     if not isinstance(D, dict) or 'net' not in D or D.get('version',0)!=1:
         raise ValueError("Invalid file contents: %s"%FP.name)
-    # expand paths to absolute (already done by simwin)
-    #D['projectdir'] = os.path.abspath(os.path.dirname(FP.name))
-    #D['net']['filename'] = os.path.join(D['projectdir'], D['net']['filename'])
+    # expand paths to absolute
+    D['projectfile'] = os.path.abspath(FP.name)
+    D['projectdir'] = os.path.dirname(D['projectfile'])
+    D['net']['filename'] = os.path.join(D['projectdir'], D['net']['filename'])
     if _log.isEnabledFor(logging.DEBUG):
         _log.debug("D: %s", D)
     return D
 
-# Match path in spice include directives
 _include = re.compile(r'(\s*\.include\s+)(\S+)(\s*)', re.IGNORECASE)
 
-def expandInclude(D, FD):
-    """ngspice will only look for include directives relative
-    to the directory where it is run, or of the 'source' statement.
-    Neither is correct for us.  So we use the directory
-    where the original schem file is (and where gnetlist ran)
+def expandInclude(F, OP, idir):
+    """Read in a deck and recursively expand .include cards
     """
-    netdir = os.path.dirname(D['net']['filename'])
+    # list of currently opened file names
+    stacknames = [os.path.abspath(F)]
+    # set of all names visited (not good to include the same file twice...)
+    visited = set(stacknames)
+    stack = [open(stacknames[0], 'r')]
 
-    def rep(M):
-        return '%s%s%s'%(M.group(1),
-            os.path.join(netdir, M.group(2)),
-            M.group(3)
-            )
+    try:
+        while len(stack):
+            FP = stack[-1]
+            L = FP.readline()
 
-    R =  _include.sub(rep, FD.read())
-    FD.seek(0)
-    FD.truncate()
-    FD.write(R)
+            if not L:
+                FP.close()
+                stack.pop()
+                stacknames.pop()
+                continue
+
+            M = _include.match(L)
+            if M is None:
+                OP.write(L)
+                continue
+            _log.info("%s includes %s", FP.name, M.group(2))
+
+            infile = os.path.join(idir, M.group(2))
+            if infile in stacknames:
+                _log.error("From: %s", FP.name)
+                _log.error("Include path: %s", ' -> '.join(stacknames))
+                raise ValueError("Recursive include of %s"%infile)
+            elif infile in visited:
+                continue
+
+            stacknames.append(infile)
+            visited.add(infile)
+            stack.append(open(os.path.join(idir, M.group(2))))
+
+    finally:
+        [FP.close() for FP in stack]
 
 def genNet(D, conf, outfile):
     netdir = os.path.dirname(D['net']['filename'])
@@ -74,13 +96,10 @@ def genNet(D, conf, outfile):
         'sch':D['net']['filename'],
     }
     cmd = conf['gnetlist.cmd']%A
-    _log.debug("In: %s",os.path.dirname(A['sch']))
+    _log.debug("In: %s",netdir)
     _log.debug("Running: '%s'", cmd)
 
     subprocess.check_call(cmd, shell=True, cwd=netdir)
-
-    with open(outfile, 'r+') as FP:
-        expandInclude(D, FP)
 
 def runSpice(D, conf, deck, outdir):
     A = {
@@ -162,13 +181,18 @@ def main(args):
 
     with TempDir() as outdir:
         _log.debug("Temp dir %s", outdir)
+        inpfile = os.path.join(outdir, 'input.net')
         netfile = os.path.join(outdir, 'generated.net')
         if D['net']['schem']:
             _log.info("Generate netlist")
-            genNet(D, conf, netfile)
+            genNet(D, conf, inpfile)
         else:
-            shutil.copy(D['net']['filename'], netfile)
-            netfile = D['net']['filename']
+            shutil.copy(D['net']['filename'], inpfile)
+
+        # Expand .include cards
+
+        with open(netfile, 'w') as FP:
+            expandInclude(inpfile, FP, os.path.dirname(D['net']['filename']))
 
         if _log.isEnabledFor(logging.DEBUG):
             with open(netfile, 'r') as FP:
