@@ -64,6 +64,12 @@ class LogWin(QtGui.QMainWindow):
         cls.instance.show()
 
     @classmethod
+    @QtCore.pyqtSlot()
+    def clearLog(cls):
+        cls.createLog()
+        cls.instance.clear()
+
+    @classmethod
     def visibleLog(cls):
         return cls.instance is not None and cls.instance.isVisible()
 
@@ -81,8 +87,11 @@ class LogWin(QtGui.QMainWindow):
 
         self._C = QtGui.QTextCursor(doc)
 
+        QtGui.QApplication.instance().aboutToQuit.connect(self.sync)
+
         self.settings = QtCore.QSettings("spicetools", "benchui")
         self.restoreGeometry(self.settings.value("logwindow/geometry").toByteArray())
+        self.ui.autoClr.setChecked(self.settings.value("logwindow/autoclear").toBool())
 
         self.save = QtGui.QFileDialog(self,
                          'Save current log contents',
@@ -92,7 +101,7 @@ class LogWin(QtGui.QMainWindow):
         self.save.setDefaultSuffix('.log')
         self.save.setAcceptMode(self.save.AcceptSave)
 
-        self.ui.actionClear.triggered.connect(self.clear)
+        self.ui.actionClear.triggered.connect(self._real_clear)
 
         self.ui.actionSaveAs.triggered.connect(self.save.show)
         self.save.fileSelected.connect(self._saveLog)
@@ -106,16 +115,22 @@ class LogWin(QtGui.QMainWindow):
 
         self._errors = 0
 
+    def sync(self):
+        self.settings.setValue("logwindow/geometry", self.saveGeometry())
+        self.settings.setValue("logwindow/autoclear", self.ui.autoClr.isChecked())
+        self.settings.sync()
+
     def closeEvent(self, evt):
         root = logging.getLogger()
         root.removeHandler(self._H)
         self.instance = None
-        self.settings.setValue("logwindow/geometry", self.saveGeometry())
-        self.settings.sync()
         evt.accept()
 
-    @QtCore.pyqtSlot()
     def clear(self):
+        if self.ui.autoClr.isChecked():
+            self._real_clear()
+
+    def _real_clear(self):
         self._Q = []
         self.ui.log.setPlainText('')
         self.write("clear")

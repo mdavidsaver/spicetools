@@ -55,6 +55,7 @@ class SimWin(QtGui.QMainWindow):
         self.ui.btnSim.clicked.connect(self.addSim)
 
         self.requestStart.connect(self.sim.startSim)
+        self.requestStart.connect(LogWin.clearLog)
         self.sim.done.connect(self.simDone)
         self.sim.stateChanged.connect(self.ui.status.setText)
 

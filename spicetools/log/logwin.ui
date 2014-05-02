@@ -52,6 +52,16 @@
        </spacer>
       </item>
       <item>
+       <widget class="QCheckBox" name="autoClr">
+        <property name="text">
+         <string>Auto Clear</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnClear">
         <property name="text">
          <string>Clear</string>
