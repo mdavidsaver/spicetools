@@ -113,7 +113,7 @@ class LogWin(QtGui.QMainWindow):
     def write(self, msg):
         if len(self._Q)>100:
             return # overflow...
-        self._Q.append(msg.rstrip())
+        self._Q.append(str(msg.rstrip()))
 
         if not self.timer:
             self.startTimer(100)
