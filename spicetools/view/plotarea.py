@@ -38,6 +38,11 @@ class PlotArea(gui.QWidget):
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
 
+        # present values in self.fig.subplotpars.*
+        self.fig.subplots_adjust(left=0.125,
+                                 bottom=0.137,
+                                 right=0.972,
+                                 top=0.957)
 
     def reset(self):
         self.axes.clear()
