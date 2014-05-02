@@ -103,18 +103,14 @@ def writeDeck(D, FP, netfile, outdir):
 
     outfiles = []
 
-    topvars = dict([(V['name'],V['expr']) for V in D.get('vars',[])])
+    topvars = [(V['name'],V['expr']) for V in D.get('vars',[])]
 
     for S in D.get('sims',[]):
         FP.write(_script_sim%S)
 
-        #TODO: Preserve order
-        locvars = dict([(V['name'],V['expr']) for V in S.get('vars',[])])
+        locvars = [(V['name'],V['expr']) for V in S.get('vars',[])]
 
-        Vars = topvars.copy()
-        Vars.update(locvars)
-
-        for K,V in Vars.iteritems():
+        for K,V in topvars+locvars:
             FP.write('let %s = %s\n'%(K,V))
 
         if S['line'].strip()=='op':
