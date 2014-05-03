@@ -10,6 +10,7 @@ from PyQt4.QtCore import Qt
 from ..util import svarname
 
 from .expr import Expr
+from .dnd import DragAndDropMixin
 
 from .analysis_ui import  Ui_Analysis
 
@@ -19,12 +20,13 @@ ac ( DEC | OCT | LIN ) N Fstart Fstop
 op
 """
 
-class Analysis(QtGui.QWidget):
+class Analysis(QtGui.QWidget, DragAndDropMixin):
     nameChanged = QtCore.pyqtSignal(QtCore.QString)
     simChanged = QtCore.pyqtSignal(QtCore.QString)
 
     def __init__(self, parent):
         super(Analysis, self).__init__(parent)
+        self.setAcceptDrops(True)
 
         self.ui = Ui_Analysis()
         self.ui.setupUi(self)
@@ -60,4 +62,32 @@ class Analysis(QtGui.QWidget):
 
     def addExpr(self):
         E = Expr(self.ui.frame)
+        E._level = self._level + 1
         self.ui.frame.layout().insertWidget(0,E)
+
+    def dropEvent(self, evt):
+        if not self.canDrop(evt):
+            return
+        S = evt.source()
+
+        if isinstance(S, Expr) and self.ui.frame.geometry().contains(evt.pos()):
+            # drop Expr into analysis
+            S.parent().layout().removeWidget(S)
+            S.setParent(self.ui.frame)
+            self.ui.frame.layout().insertWidget(0,S)
+            S._level = self._level + 1
+
+        else:
+            # drop Expr or Analysis in our place
+            I = self.parent().layout().indexOf(self)
+    
+            S = evt.source()
+            S.parent().layout().removeWidget(S)
+            S.setParent(self.parent())
+            self.parent().layout().insertWidget(I, S)
+            S._level = self._level
+            
+        evt.acceptProposedAction()
+
+Analysis.acceptableDrops = (Analysis, Expr)
+Expr.acceptableDrops = Expr.acceptableDrops + (Analysis,)

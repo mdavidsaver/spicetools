@@ -120,10 +120,12 @@ class SimWin(QtGui.QMainWindow):
 
     def addExpr(self):
         E = Expr(self.ui.topArea)
+        E._level = 0
         self.ui.topArea.layout().insertWidget(0,E)
 
     def addSim(self):
         A = Analysis(self.ui.topArea)
+        A._level = 0
         self.ui.topArea.layout().insertWidget(0,A)
 
     def _editNet(self):
@@ -257,11 +259,13 @@ class SimWin(QtGui.QMainWindow):
 
         for V in topvars:
             E = Expr(self.ui.topArea)
+            E._level = 0
             E.pyqtConfigure(name=V['name'], expr=V['expr'])
             L.insertWidget(0, E)
 
         for S in sims:
             A = Analysis(self.ui.topArea)
+            A._level = 0
             A.pyqtConfigure(name=S['name'], sim=S['line'])
             L.insertWidget(0, A)
 
@@ -271,6 +275,7 @@ class SimWin(QtGui.QMainWindow):
 
             for V in S.get('vars',[]):
                 E = Expr(SW)
+                E._level = 1
                 E.pyqtConfigure(name=V['name'], expr=V['expr'])
                 SL.insertWidget(0, E)
 

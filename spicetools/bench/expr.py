@@ -8,15 +8,17 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
 from ..util import svarname
+from .dnd import DragAndDropMixin
 
 from .expr_ui import Ui_Expr
 
-class Expr(QtGui.QWidget):
+class Expr(QtGui.QWidget, DragAndDropMixin):
     nameChanged = QtCore.pyqtSignal(QtCore.QString)
     exprChanged = QtCore.pyqtSignal(QtCore.QString)
 
     def __init__(self, parent):
         super(Expr, self).__init__(parent)
+        self.setAcceptDrops(True)
 
         self.ui = Ui_Expr()
         self.ui.setupUi(self)
@@ -41,3 +43,20 @@ class Expr(QtGui.QWidget):
 
     name = QtCore.pyqtProperty(QtCore.QString, name, setName, notify=nameChanged)
     expr = QtCore.pyqtProperty(QtCore.QString, expr, setExpr, notify=exprChanged)
+
+    def dropEvent(self, evt):
+        S = evt.source()
+
+        if not isinstance(S, self.__class__) and self._level>0:
+            return # can't nest Analysis within Analysis
+
+        I = self.parent().layout().indexOf(self)
+
+        S.parent().layout().removeWidget(S)
+        S.setParent(self.parent())
+        self.parent().layout().insertWidget(I, S)
+        S._level = self._level
+            
+        evt.acceptProposedAction()
+
+Expr.acceptableDrops = (Expr,)
