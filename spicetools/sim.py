@@ -135,8 +135,14 @@ def writeDeck(D, FP, netfile, outdir):
         for K,V in topvars+locvars:
             FP.write('let %s = %s\n'%(K,V))
 
-        if S['line'].strip()=='op':
-            FP.write('print all\n')
+        # pick out the analysis type
+        aparts = S['line'].split()
+        atype = aparts[0].strip()
+
+        # for analysis types which don't produce vector output
+        # printing to log is convienent
+        if atype in ['op','tf','pz'] or (atype=='sens' and len(aparts)==2):
+            FP.write('echo "Results of %s"\nprint all\n'%S['name'])
         FP.write('write %s.raw\n'%S['name'])
         outfiles.append(('%s.raw'%S['name'], S['name']))
 

@@ -15,9 +15,15 @@ from .dnd import DragAndDropMixin
 from .analysis_ui import  Ui_Analysis
 
 simtip = """tran Tstep Tstop [ Tstart [ Tmax ] ] [ UIC ]
-dc Source-Name Vstart Vstop Vincr [ Source2 Vstart2 Vstop2 Vincr2 ]
-ac ( DEC | OCT | LIN ) N Fstart Fstop
+dc Source Vstart Vstop Vincr [ Source2 Vstart2 Vstop2 Vincr2 ]
+ac DEC|OCT|LIN ) N Fstart Fstop
 op
+tf Node Source
+pz Node Node Node Node cur|vol pol|zer|pz
+sens Var
+sens Var ac DEC|OCT|LIN N Fstart Fstop
+noise Node Source DEC|OCT|LIN N Fstart Fstop
+disto DEC|OCT|LIN ) N Fstart Fstop
 """
 
 class Analysis(QtGui.QWidget, DragAndDropMixin):
