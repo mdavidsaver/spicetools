@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'spicetools/bench/analysis.ui'
 #
-# Created: Sun Apr 27 13:13:01 2014
+# Created: Sat Jul  5 20:56:18 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,9 @@ class Ui_Analysis(object):
         self.btnExpr = QtGui.QPushButton(Analysis)
         self.btnExpr.setObjectName(_fromUtf8("btnExpr"))
         self.horizontalLayout_2.addWidget(self.btnExpr)
+        self.btnAlter = QtGui.QPushButton(Analysis)
+        self.btnAlter.setObjectName(_fromUtf8("btnAlter"))
+        self.horizontalLayout_2.addWidget(self.btnAlter)
         self.btnDel = QtGui.QPushButton(Analysis)
         self.btnDel.setObjectName(_fromUtf8("btnDel"))
         self.horizontalLayout_2.addWidget(self.btnDel)
@@ -83,6 +86,7 @@ class Ui_Analysis(object):
         self.label.setText(QtGui.QApplication.translate("Analysis", "Analysis", None, QtGui.QApplication.UnicodeUTF8))
         self.name.setPlaceholderText(QtGui.QApplication.translate("Analysis", "name", None, QtGui.QApplication.UnicodeUTF8))
         self.btnExpr.setText(QtGui.QApplication.translate("Analysis", "Add Expr.", None, QtGui.QApplication.UnicodeUTF8))
+        self.btnAlter.setText(QtGui.QApplication.translate("Analysis", "Add Alter", None, QtGui.QApplication.UnicodeUTF8))
         self.btnDel.setText(QtGui.QApplication.translate("Analysis", "-", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Analysis", "Line:", None, QtGui.QApplication.UnicodeUTF8))
         self.sim.setPlaceholderText(QtGui.QApplication.translate("Analysis", "analysis definition", None, QtGui.QApplication.UnicodeUTF8))

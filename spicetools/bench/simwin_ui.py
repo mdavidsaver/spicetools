@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'spicetools/bench/simwin.ui'
 #
-# Created: Sun Apr 27 15:46:46 2014
+# Created: Sat Jul  5 20:56:18 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,9 @@ class Ui_SimWin(object):
         self.btnExpr = QtGui.QPushButton(self.centralwidget)
         self.btnExpr.setObjectName(_fromUtf8("btnExpr"))
         self.horizontalLayout.addWidget(self.btnExpr)
+        self.btnAlter = QtGui.QPushButton(self.centralwidget)
+        self.btnAlter.setObjectName(_fromUtf8("btnAlter"))
+        self.horizontalLayout.addWidget(self.btnAlter)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.btnRun = QtGui.QPushButton(self.centralwidget)
@@ -137,6 +140,7 @@ class Ui_SimWin(object):
         SimWin.setWindowTitle(QtGui.QApplication.translate("SimWin", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
         self.btnSim.setText(QtGui.QApplication.translate("SimWin", "Add Analysis", None, QtGui.QApplication.UnicodeUTF8))
         self.btnExpr.setText(QtGui.QApplication.translate("SimWin", "Add Expr.", None, QtGui.QApplication.UnicodeUTF8))
+        self.btnAlter.setText(QtGui.QApplication.translate("SimWin", "Add Alter", None, QtGui.QApplication.UnicodeUTF8))
         self.btnRun.setText(QtGui.QApplication.translate("SimWin", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.btnStop.setText(QtGui.QApplication.translate("SimWin", "Abort", None, QtGui.QApplication.UnicodeUTF8))
         self.btnPlot.setText(QtGui.QApplication.translate("SimWin", "Plot", None, QtGui.QApplication.UnicodeUTF8))

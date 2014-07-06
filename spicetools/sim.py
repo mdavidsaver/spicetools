@@ -126,8 +126,14 @@ def writeDeck(D, FP, netfile, outdir):
     outfiles = []
 
     topvars = [(V['name'],V['expr']) for V in D.get('vars',[])]
+    topalters = [(V['name'],V['expr']) for V in D.get('alters',[])]
 
     for S in D.get('sims',[]):
+        localters = [(V['name'],V['expr']) for V in S.get('alters',[])]
+        
+        for K, V in topalters+localters:
+            FP.write('alter %s %s\n'%(K,V))
+
         FP.write(_script_sim%S)
 
         locvars = [(V['name'],V['expr']) for V in S.get('vars',[])]
@@ -145,6 +151,8 @@ def writeDeck(D, FP, netfile, outdir):
             FP.write('echo "Results of %s"\nprint all\n'%S['name'])
         FP.write('write %s.raw\n'%S['name'])
         outfiles.append(('%s.raw'%S['name'], S['name']))
+        
+        FP.write("reset\n") # reset any alterations
 
     FP.write(_script_end)
     return outfiles

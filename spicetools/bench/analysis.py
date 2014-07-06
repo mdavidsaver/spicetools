@@ -9,7 +9,7 @@ from PyQt4.QtCore import Qt
 
 from ..util import svarname
 
-from .expr import Expr
+from .expr import Expr, Alter
 from .dnd import DragAndDropMixin
 
 from .analysis_ui import  Ui_Analysis
@@ -42,6 +42,7 @@ class Analysis(QtGui.QWidget, DragAndDropMixin):
 
         self.ui.btnDel.clicked.connect(self.deleteLater)
         self.ui.btnExpr.clicked.connect(self.addExpr)
+        self.ui.btnAlter.clicked.connect(self.addAlter)
 
         self.ui.name.setValidator(QtGui.QRegExpValidator(svarname, self.ui.name))
         self.ui.sim.setToolTip(simtip)
@@ -71,20 +72,25 @@ class Analysis(QtGui.QWidget, DragAndDropMixin):
         E._level = self._level + 1
         self.ui.frame.layout().insertWidget(0,E)
 
+    def addAlter(self):
+        E = Alter(self.ui.frame)
+        E._level = self._level + 1
+        self.ui.frame.layout().insertWidget(0,E)
+
     def dropEvent(self, evt):
         if not self.canDrop(evt):
             return
         S = evt.source()
 
-        if isinstance(S, Expr) and self.ui.frame.geometry().contains(evt.pos()):
-            # drop Expr into analysis
+        if isinstance(S, (Expr,Alter)) and self.ui.frame.geometry().contains(evt.pos()):
+            # drop Expr/Alter into analysis
             S.parent().layout().removeWidget(S)
             S.setParent(self.ui.frame)
             self.ui.frame.layout().insertWidget(0,S)
             S._level = self._level + 1
 
         else:
-            # drop Expr or Analysis in our place
+            # drop Expr, Alter, or Analysis in our place
             I = self.parent().layout().indexOf(self)
     
             S = evt.source()
@@ -95,5 +101,6 @@ class Analysis(QtGui.QWidget, DragAndDropMixin):
             
         evt.acceptProposedAction()
 
-Analysis.acceptableDrops = (Analysis, Expr)
+Analysis.acceptableDrops = (Analysis, Expr, Alter)
 Expr.acceptableDrops = Expr.acceptableDrops + (Analysis,)
+Alter.acceptableDrops = Alter.acceptableDrops + (Analysis,)

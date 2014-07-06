@@ -15,7 +15,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
 from .simwin_ui import Ui_SimWin
-from .expr import Expr
+from .expr import Expr, Alter
 from .analysis import Analysis
 from .spiceexec import SpiceRunner
 from ..log.logwin import LogWin
@@ -55,6 +55,7 @@ class SimWin(QtGui.QMainWindow):
         self.ui.actionEditNet.triggered.connect(self._editNet)
 
         self.ui.btnExpr.clicked.connect(self.addExpr)
+        self.ui.btnAlter.clicked.connect(self.addAlter)
         self.ui.btnSim.clicked.connect(self.addSim)
 
         self.requestStart.connect(self.sim.startSim)
@@ -81,6 +82,10 @@ class SimWin(QtGui.QMainWindow):
         self.fname = fname and str(fname)
         if fname:
             self.dia.selectFile(fname)
+            F = self.dia.selectedFiles()
+            fname = str(F[0]) if len(F)>0 else None
+        if fname:
+            fname = os.path.relpath(fname)
             self.setWindowTitle("Spice Bench - %s"%fname)
         else:
             self.setWindowTitle("Spice Bench")
@@ -120,6 +125,11 @@ class SimWin(QtGui.QMainWindow):
 
     def addExpr(self):
         E = Expr(self.ui.topArea)
+        E._level = 0
+        self.ui.topArea.layout().insertWidget(0,E)
+
+    def addAlter(self):
+        E = Alter(self.ui.topArea)
         E._level = 0
         self.ui.topArea.layout().insertWidget(0,E)
 
@@ -253,12 +263,18 @@ class SimWin(QtGui.QMainWindow):
         self.ui.fileFrame.file = N['filename']
         self.ui.fileFrame.type = N['schem']
 
-        topvars, sims = D.get('vars',[]), D.get('sims',[])
+        topvars, topalters, sims = D.get('vars',[]), D.get('alters',[]), D.get('sims',[])
 
         L = self.ui.topArea.layout()
 
         for V in topvars:
             E = Expr(self.ui.topArea)
+            E._level = 0
+            E.pyqtConfigure(name=V['name'], expr=V['expr'])
+            L.insertWidget(0, E)
+
+        for V in topalters:
+            E = Alter(self.ui.topArea)
             E._level = 0
             E.pyqtConfigure(name=V['name'], expr=V['expr'])
             L.insertWidget(0, E)
@@ -279,12 +295,19 @@ class SimWin(QtGui.QMainWindow):
                 E.pyqtConfigure(name=V['name'], expr=V['expr'])
                 SL.insertWidget(0, E)
 
+            for V in S.get('alters',[]):
+                E = Alter(SW)
+                E._level = 1
+                E.pyqtConfigure(name=V['name'], expr=V['expr'])
+                SL.insertWidget(0, E)
+
     def todict(self):
         result = {'version':1,
              'net':{'filename':str(self.ui.fileFrame.file),
                     'schem':self.ui.fileFrame.type}}
 
         tvars = result['vars'] = []
+        talter = result['alters'] = []
         sims = result['sims'] = []
 
         for C in self.ui.topArea.children():
@@ -293,16 +316,27 @@ class SimWin(QtGui.QMainWindow):
                 if D['name'] or D['expr']:
                     tvars.append(D)
 
-            if isinstance(C, Analysis):
+            elif isinstance(C, Alter):
+                D = {'name':str(C.name), 'expr':str(C.expr)}
+                if D['name'] or D['expr']:
+                    talter.append(D)
+
+            elif isinstance(C, Analysis):
                 S = {'name':str(C.name), 'line':str(C.sim)}
 
                 V = S['vars'] = []
+                A = S['alters'] = []
 
                 for CC in C.exprWidget().children():
                     if isinstance(CC, Expr):
                         D = {'name':str(CC.name), 'expr':str(CC.expr)}
                         if D['name'] or D['expr']:
                             V.append(D)
+
+                    elif isinstance(CC, Alter):
+                        D = {'name':str(CC.name), 'expr':str(CC.expr)}
+                        if D['name'] or D['expr']:
+                            A.append(D)
 
                 if S['name'] or S['line'] or len(V):
                     sims.append(S)

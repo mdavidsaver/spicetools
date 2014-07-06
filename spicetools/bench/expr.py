@@ -11,16 +11,17 @@ from ..util import svarname
 from .dnd import DragAndDropMixin
 
 from .expr_ui import Ui_Expr
+from .alter_ui import Ui_Alter
 
-class Expr(QtGui.QWidget, DragAndDropMixin):
+class Common(QtGui.QWidget, DragAndDropMixin):
     nameChanged = QtCore.pyqtSignal(QtCore.QString)
     exprChanged = QtCore.pyqtSignal(QtCore.QString)
 
     def __init__(self, parent):
-        super(Expr, self).__init__(parent)
+        super(Common, self).__init__(parent)
         self.setAcceptDrops(True)
 
-        self.ui = Ui_Expr()
+        self.ui = self.uic()
         self.ui.setupUi(self)
 
         self.ui.btnDel.clicked.connect(self.deleteLater)
@@ -45,9 +46,10 @@ class Expr(QtGui.QWidget, DragAndDropMixin):
     expr = QtCore.pyqtProperty(QtCore.QString, expr, setExpr, notify=exprChanged)
 
     def dropEvent(self, evt):
+        from .analysis import Analysis
         S = evt.source()
 
-        if not isinstance(S, self.__class__) and self._level>0:
+        if isinstance(S, Analysis) and self._level>0:
             return # can't nest Analysis within Analysis
 
         I = self.parent().layout().indexOf(self)
@@ -59,4 +61,11 @@ class Expr(QtGui.QWidget, DragAndDropMixin):
             
         evt.acceptProposedAction()
 
-Expr.acceptableDrops = (Expr,)
+class Expr(Common):
+    uic = Ui_Expr
+
+class Alter(Common):
+    uic = Ui_Alter
+
+Expr.acceptableDrops = (Expr,Alter)
+Alter.acceptableDrops = (Expr,Alter)

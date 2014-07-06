@@ -51,6 +51,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnAlter">
+       <property name="text">
+        <string>Add Alter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnDel">
        <property name="text">
         <string>-</string>
