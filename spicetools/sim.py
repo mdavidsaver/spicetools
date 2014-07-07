@@ -36,8 +36,10 @@ def getargs(args=None):
 def loadProject(FP):
     import json
     D = json.load(FP)
-    if not isinstance(D, dict) or 'net' not in D or D.get('version',0)!=1:
+    if not isinstance(D, dict) or 'net' not in D or D.get('version',0) not in [1,2]:
         raise ValueError("Invalid file contents: %s"%FP.name)
+    from .compat import updateDict
+    D = updateDict(D)
     # expand paths to absolute
     D['projectfile'] = os.path.abspath(FP.name)
     D['projectdir'] = os.path.dirname(D['projectfile'])
@@ -125,21 +127,20 @@ def writeDeck(D, FP, netfile, outdir):
 
     outfiles = []
 
-    topvars = [(V['name'],V['expr']) for V in D.get('vars',[])]
-    topalters = [(V['name'],V['expr']) for V in D.get('alters',[])]
+    beforeall = D.get('before','')
+    afterall = D.get('after','')
 
     for S in D.get('sims',[]):
-        localters = [(V['name'],V['expr']) for V in S.get('alters',[])]
         
-        for K, V in topalters+localters:
-            FP.write('alter %s %s\n'%(K,V))
+        FP.write('echo "Analysis %(name)s\n"'%S)
 
-        FP.write(_script_sim%S)
+        FP.write(beforeall+'\n')
+        FP.write(S.get('before','')+'\n')
 
-        locvars = [(V['name'],V['expr']) for V in S.get('vars',[])]
+        FP.write('%(line)s'%S)
 
-        for K,V in topvars+locvars:
-            FP.write('let %s = %s\n'%(K,V))
+        FP.write(afterall+'\n')
+        FP.write(S.get('after','')+'\n')
 
         # pick out the analysis type
         aparts = S['line'].split()
@@ -164,10 +165,6 @@ echo "Loading Netlist"
 shell ls -l
 source generated.net
 echo "Loaded Netlist"
-"""
-
-_script_sim = """echo "Analysis %(name)s"
-%(line)s
 """
 
 _script_end = """echo "Deck Done"

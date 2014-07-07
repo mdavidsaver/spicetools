@@ -12,10 +12,8 @@ import os, os.path
 import json, re
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
 
 from .simwin_ui import Ui_SimWin
-from .expr import Expr, Alter
 from .analysis import Analysis
 from .spiceexec import SpiceRunner
 from ..log.logwin import LogWin
@@ -41,7 +39,7 @@ class SimWin(QtGui.QMainWindow):
         self.restoreGeometry(self.settings.value("mainwindow/geometry").toByteArray())
 
         QtGui.QVBoxLayout(self.ui.topArea)
-        self.ui.topArea.layout().insertStretch(0)
+        self.ui.topArea.layout().insertStretch(1)
 
         self.sim = SpiceRunner(self)
 
@@ -54,8 +52,6 @@ class SimWin(QtGui.QMainWindow):
         self.ui.actionPlot.triggered.connect(self._showPlot)
         self.ui.actionEditNet.triggered.connect(self._editNet)
 
-        self.ui.btnExpr.clicked.connect(self.addExpr)
-        self.ui.btnAlter.clicked.connect(self.addAlter)
         self.ui.btnSim.clicked.connect(self.addSim)
 
         self.requestStart.connect(self.sim.startSim)
@@ -100,6 +96,7 @@ class SimWin(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def startSim(self):
+        _log.info('Start sim')
         D = self.todict()
         # Expand paths fully
         D['projectfile'] = os.path.abspath(self.fname or 'unsaved.proj')
@@ -122,16 +119,6 @@ class SimWin(QtGui.QMainWindow):
         W = ViewerWindow()
         W.open(self.h5file)
         W.show()
-
-    def addExpr(self):
-        E = Expr(self.ui.topArea)
-        E._level = 0
-        self.ui.topArea.layout().insertWidget(0,E)
-
-    def addAlter(self):
-        E = Alter(self.ui.topArea)
-        E._level = 0
-        self.ui.topArea.layout().insertWidget(0,E)
 
     def addSim(self):
         A = Analysis(self.ui.topArea)
@@ -224,7 +211,7 @@ class SimWin(QtGui.QMainWindow):
         # validate
         if not isinstance(D, dict) or 'net' not in D or 'version' not in D:
             raise ValueError('Invalid json contents')
-        elif D['version']!=1:
+        elif D['version'] not in [1,2]:
             raise ValueError('Unsupported version: %s'%D['version'])
 
         try:
@@ -259,86 +246,47 @@ class SimWin(QtGui.QMainWindow):
             FP.write('\n')
 
     def fromdict(self, D):
+        from ..compat import updateDict
+        D = updateDict(D)
+
         N = D['net']
         self.ui.fileFrame.file = N['filename']
         self.ui.fileFrame.type = N['schem']
 
-        topvars, topalters, sims = D.get('vars',[]), D.get('alters',[]), D.get('sims',[])
+        sims = D.get('sims',[])
+        
+        self.ui.beforeText.setPlainText(D.get('before',''))
+        self.ui.afterText.setPlainText(D.get('after',''))
 
         L = self.ui.topArea.layout()
-
-        for V in topvars:
-            E = Expr(self.ui.topArea)
-            E._level = 0
-            E.pyqtConfigure(name=V['name'], expr=V['expr'])
-            L.insertWidget(0, E)
-
-        for V in topalters:
-            E = Alter(self.ui.topArea)
-            E._level = 0
-            E.pyqtConfigure(name=V['name'], expr=V['expr'])
-            L.insertWidget(0, E)
 
         for S in sims:
             A = Analysis(self.ui.topArea)
             A._level = 0
-            A.pyqtConfigure(name=S['name'], sim=S['line'])
+            A.setName(S['name'])
+            A.setBefore(S['before'])
+            A.setSim(S['line'])
+            A.setAfter(S['after'])
             L.insertWidget(0, A)
 
-            SW = A.exprWidget()
-            SL = SW.layout()
-            assert SL is not None
-
-            for V in S.get('vars',[]):
-                E = Expr(SW)
-                E._level = 1
-                E.pyqtConfigure(name=V['name'], expr=V['expr'])
-                SL.insertWidget(0, E)
-
-            for V in S.get('alters',[]):
-                E = Alter(SW)
-                E._level = 1
-                E.pyqtConfigure(name=V['name'], expr=V['expr'])
-                SL.insertWidget(0, E)
-
     def todict(self):
-        result = {'version':1,
+        result = {'version':2,
              'net':{'filename':str(self.ui.fileFrame.file),
                     'schem':self.ui.fileFrame.type}}
 
-        tvars = result['vars'] = []
-        talter = result['alters'] = []
+        result['before'] = str(self.ui.beforeText.toPlainText())
+        result['after'] = str(self.ui.afterText.toPlainText())
+
         sims = result['sims'] = []
 
         for C in self.ui.topArea.children():
-            if isinstance(C, Expr):
-                D = {'name':str(C.name), 'expr':str(C.expr)}
-                if D['name'] or D['expr']:
-                    tvars.append(D)
 
-            elif isinstance(C, Alter):
-                D = {'name':str(C.name), 'expr':str(C.expr)}
-                if D['name'] or D['expr']:
-                    talter.append(D)
+            if isinstance(C, Analysis):
+                S = {'name':str(C.name()), 'line':str(C.sim()),
+                     'before':str(C.before()), 'after':str(C.after())}
 
-            elif isinstance(C, Analysis):
-                S = {'name':str(C.name), 'line':str(C.sim)}
-
-                V = S['vars'] = []
-                A = S['alters'] = []
-
-                for CC in C.exprWidget().children():
-                    if isinstance(CC, Expr):
-                        D = {'name':str(CC.name), 'expr':str(CC.expr)}
-                        if D['name'] or D['expr']:
-                            V.append(D)
-
-                    elif isinstance(CC, Alter):
-                        D = {'name':str(CC.name), 'expr':str(CC.expr)}
-                        if D['name'] or D['expr']:
-                            A.append(D)
-
-                if S['name'] or S['line'] or len(V):
+                # save if any string is not empty
+                if map(len, S.itervalues()) > 0:
                     sims.append(S)
 
         return result

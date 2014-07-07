@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>486</width>
+    <width>529</width>
     <height>488</height>
    </rect>
   </property>
@@ -25,20 +25,6 @@
        <widget class="QPushButton" name="btnSim">
         <property name="text">
          <string>Add Analysis</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnExpr">
-        <property name="text">
-         <string>Add Expr.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnAlter">
-        <property name="text">
-         <string>Add Alter</string>
         </property>
        </widget>
       </item>
@@ -108,13 +94,88 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>472</width>
+         <width>515</width>
          <height>392</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QWidget" name="topArea" native="true"/>
+         <widget class="QFrame" name="beforeFrame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Before/After each Analysis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnHideba">
+               <property name="text">
+                <string>-</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Before:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPlainTextEdit" name="beforeText"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>After</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPlainTextEdit" name="afterText"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="topArea" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -127,7 +188,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>486</width>
+     <width>529</width>
      <height>20</height>
     </rect>
    </property>
@@ -269,6 +330,22 @@
  </resources>
  <connections>
   <connection>
+   <sender>btnHideba</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>widget</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>487</x>
+     <y>99</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>79</x>
+     <y>232</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
    <receiver>SimWin</receiver>
@@ -279,7 +356,7 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>242</x>
+     <x>264</x>
      <y>243</y>
     </hint>
    </hints>
@@ -291,7 +368,7 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>327</x>
+     <x>316</x>
      <y>36</y>
     </hint>
     <hint type="destinationlabel">
@@ -307,7 +384,7 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>385</x>
+     <x>374</x>
      <y>36</y>
     </hint>
     <hint type="destinationlabel">
@@ -323,7 +400,7 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
+     <x>433</x>
      <y>36</y>
     </hint>
     <hint type="destinationlabel">

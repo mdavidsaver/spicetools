@@ -5,14 +5,17 @@ License is GPL3+, see file LICENSE for details
 """
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
 
 from ..util import svarname
 
-from .expr import Expr, Alter
 from .dnd import DragAndDropMixin
 
 from .analysis_ui import  Ui_Analysis
+
+beforetip = """alter Inst Value
+alter Inst Param=Value
+alter Inst Param=Value Param=Value ...
+"""
 
 simtip = """tran Tstep Tstop [ Tstart [ Tmax ] ] [ UIC ]
 dc Source Vstart Vstop Vincr [ Source2 Vstart2 Vstop2 Vincr2 ]
@@ -26,9 +29,14 @@ noise Node Source DEC|OCT|LIN N Fstart Fstop
 disto DEC|OCT|LIN ) N Fstart Fstop
 """
 
+aftertip = """let Var = Expr
+"""
+
 class Analysis(QtGui.QWidget, DragAndDropMixin):
     nameChanged = QtCore.pyqtSignal(QtCore.QString)
     simChanged = QtCore.pyqtSignal(QtCore.QString)
+    beforeChanged = QtCore.pyqtSignal(QtCore.QString)
+    afterChanged = QtCore.pyqtSignal(QtCore.QString)
 
     def __init__(self, parent):
         super(Analysis, self).__init__(parent)
@@ -37,18 +45,24 @@ class Analysis(QtGui.QWidget, DragAndDropMixin):
         self.ui = Ui_Analysis()
         self.ui.setupUi(self)
 
-        QtGui.QVBoxLayout(self.ui.frame)
-        self.ui.frame.layout().insertStretch(0)
-
         self.ui.btnDel.clicked.connect(self.deleteLater)
-        self.ui.btnExpr.clicked.connect(self.addExpr)
-        self.ui.btnAlter.clicked.connect(self.addAlter)
 
         self.ui.name.setValidator(QtGui.QRegExpValidator(svarname, self.ui.name))
+        self.ui.beforeText.setToolTip(beforetip)
         self.ui.sim.setToolTip(simtip)
+        self.ui.afterText.setToolTip(aftertip)
 
     def name(self):
         return self.ui.name.text()
+
+    def sim(self):
+        return self.ui.sim.text()
+
+    def before(self):
+        return self.ui.beforeText.toPlainText()
+
+    def after(self):
+        return self.ui.afterText.toPlainText()
 
     def setName(self, S):
         self.ui.name.setText(S)
@@ -58,49 +72,28 @@ class Analysis(QtGui.QWidget, DragAndDropMixin):
         self.ui.sim.setText(S)
         self.simChanged.emit(S)
 
-    def sim(self):
-        return self.ui.sim.text()
+    def setBefore(self, S):
+        self.ui.beforeText.setPlainText(S)
+        self.beforeChanged.emit(S)
 
-    name = QtCore.pyqtProperty(QtCore.QString, name, setName, notify=nameChanged)
-    sim = QtCore.pyqtProperty(QtCore.QString, sim, setSim, notify=simChanged)
-
-    def exprWidget(self):
-        return self.ui.frame
-
-    def addExpr(self):
-        E = Expr(self.ui.frame)
-        E._level = self._level + 1
-        self.ui.frame.layout().insertWidget(0,E)
-
-    def addAlter(self):
-        E = Alter(self.ui.frame)
-        E._level = self._level + 1
-        self.ui.frame.layout().insertWidget(0,E)
+    def setAfter(self, S):
+        self.ui.afterText.setPlainText(S)
+        self.afterChanged.emit(S)
 
     def dropEvent(self, evt):
         if not self.canDrop(evt):
             return
         S = evt.source()
 
-        if isinstance(S, (Expr,Alter)) and self.ui.frame.geometry().contains(evt.pos()):
-            # drop Expr/Alter into analysis
-            S.parent().layout().removeWidget(S)
-            S.setParent(self.ui.frame)
-            self.ui.frame.layout().insertWidget(0,S)
-            S._level = self._level + 1
+        # Analysis in our place
+        I = self.parent().layout().indexOf(self)
 
-        else:
-            # drop Expr, Alter, or Analysis in our place
-            I = self.parent().layout().indexOf(self)
-    
-            S = evt.source()
-            S.parent().layout().removeWidget(S)
-            S.setParent(self.parent())
-            self.parent().layout().insertWidget(I, S)
-            S._level = self._level
+        S = evt.source()
+        S.parent().layout().removeWidget(S)
+        S.setParent(self.parent())
+        self.parent().layout().insertWidget(I, S)
+        S._level = self._level
             
         evt.acceptProposedAction()
 
-Analysis.acceptableDrops = (Analysis, Expr, Alter)
-Expr.acceptableDrops = Expr.acceptableDrops + (Analysis,)
-Alter.acceptableDrops = Alter.acceptableDrops + (Analysis,)
+Analysis.acceptableDrops = (Analysis,)
