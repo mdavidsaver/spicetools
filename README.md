@@ -1,6 +1,9 @@
 Spice Simulation Tools
 ======================
 
+This is obsolete!  Qucs [http://qucs.sourceforge.net/](http://qucs.sourceforge.net/)
+is much better.
+
 This package contains sevaral programs which work with the NGSpice circut
 simulation.
 spicebench and spicerunner define and execute simulations.
